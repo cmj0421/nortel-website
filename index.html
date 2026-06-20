@@ -92,51 +92,14 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
 }
 #three-canvas.reveal{opacity:1}
 
-/* ── Scroll content ───────────────────────────────────────────── */
-#scroll-content{
-  position:fixed;inset:0;z-index:15;
-  overflow-y:scroll;pointer-events:none;
+/* ── Hero overlay ─────────────────────────────────────────────── */
+#hero-overlay{
+  position:fixed;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;
   opacity:0;transition:opacity 0.9s ease-out 0.2s;
-  scrollbar-width:none;
 }
-#scroll-content::-webkit-scrollbar{display:none}
-#scroll-content.reveal{opacity:1;pointer-events:auto}
-
-.sc-section{
-  height:100vh;width:100%;
-  display:flex;align-items:center;justify-content:center;
-}
-.sc-hero-inner{
-  display:flex;flex-direction:column;align-items:center;text-align:center;
-}
-.sc-text-block{
-  max-width:560px;padding:44px 36px;margin:0 20px;
-  background:rgba(5,4,2,0.65);
-  border:1px solid rgba(212,175,55,.12);border-radius:3px;
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  text-align:center;
-}
-.sc-heading{
-  font-size:clamp(1.7rem,4vw,2.8rem);
-  font-weight:700;letter-spacing:.04em;line-height:1.15;margin-bottom:18px;
-  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.sc-body{
-  font-size:clamp(.88rem,1.7vw,1.05rem);
-  line-height:1.78;letter-spacing:.022em;color:rgba(215,185,95,.88);
-}
-.sc-divider{
-  width:72px;height:1px;margin:18px auto 22px;
-  background:linear-gradient(90deg,transparent,rgba(212,175,55,.5),transparent);
-}
-.sc-final-inner{display:flex;flex-direction:column;align-items:center;text-align:center;}
-.sc-final-label{
-  margin-bottom:30px;
-  font-size:clamp(.82rem,1.5vw,.95rem);letter-spacing:.2em;text-transform:uppercase;
-  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
+#hero-overlay.reveal{opacity:1;pointer-events:auto}
 
 .hero-logo-wrap{margin-bottom:28px;text-align:center}
 .hero-logo-img{
@@ -214,61 +177,27 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
 <!-- ══ THREE.JS CANVAS ═══════════════════════════════════════════ -->
 <canvas id="three-canvas"></canvas>
 
-<!-- ══ SCROLL CONTENT ════════════════════════════════════════════ -->
-<div id="scroll-content">
+<!-- ══ HERO OVERLAY ══════════════════════════════════════════════ -->
+<div id="hero-overlay">
+  <div class="hero-logo-wrap">
+    <img src="logo.png" class="hero-logo-img" alt="Nortel Network Group">
+  </div>
+  <div class="hero-company">Nortel Network Group, LLC</div>
+  <div class="hero-tagline">Intelligence. Engineered for Growth.</div>
+  <div class="hero-divider"></div>
+  <a href="tel:+12137554907" class="hero-cta">
+    <span>📞</span><span>Call NOVA</span>
+  </a>
+  <p class="hero-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
+  <a href="index.html" class="hero-enter-site">Enter Site →</a>
 
-  <!-- § 1 Hero — transparent, 3D orb shows through -->
-  <section class="sc-section">
-    <div class="sc-hero-inner">
-      <div class="hero-logo-wrap">
-        <img src="logo.png" class="hero-logo-img" alt="Nortel Network Group">
-      </div>
-      <div class="hero-company">Nortel Network Group, LLC</div>
-      <div class="hero-tagline">Intelligence. Engineered for Growth.</div>
-      <div class="hero-divider"></div>
-      <a href="tel:+12137554907" class="hero-cta"><span>📞</span><span>Call NOVA</span></a>
-      <p class="hero-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
-      <a href="index.html" class="hero-enter-site">Enter Site →</a>
-    </div>
-  </section>
-
-  <!-- § 2 Autonomous Automation — node network 3D behind -->
-  <section class="sc-section">
-    <div class="sc-text-block">
-      <h2 class="sc-heading">Autonomous Automation</h2>
-      <div class="sc-divider"></div>
-      <p class="sc-body">Your business runs itself, 24/7. AI agents handle scheduling, customer outreach, follow-ups, and reporting — so you focus on growth, not operations.</p>
-    </div>
-  </section>
-
-  <!-- § 3 Worldwide Marketing — globe 3D behind -->
-  <section class="sc-section">
-    <div class="sc-text-block">
-      <h2 class="sc-heading">Worldwide Marketing</h2>
-      <div class="sc-divider"></div>
-      <p class="sc-body">Reach customers across every market and timezone. Intelligent campaigns that adapt to local cultures, timing, and channels — globally coordinated, locally relevant.</p>
-    </div>
-  </section>
-
-  <!-- § 4 Multilingual AI Agents — data streams 3D behind -->
-  <section class="sc-section">
-    <div class="sc-text-block">
-      <h2 class="sc-heading">Multilingual AI Agents</h2>
-      <div class="sc-divider"></div>
-      <p class="sc-body">Speak your customers' language — literally. NOVA communicates in dozens of languages, building trust and closing deals across borders without translation delays.</p>
-    </div>
-  </section>
-
-  <!-- § 5 Final CTA -->
-  <section class="sc-section">
-    <div class="sc-final-inner">
-      <p class="sc-final-label">Ready to transform your business?</p>
-      <a href="tel:+12137554907" class="hero-cta"><span>📞</span><span>Call NOVA</span></a>
-      <p class="hero-sub" style="margin-top:18px">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
-    </div>
-  </section>
-
-  <!-- PHASE 2: NOVA ROBOT ANIMATION VIDEO — uncomment to enable -->
+  <!-- ═══════════════════════════════════════════════════════════════
+       PHASE 2: NOVA ROBOT ANIMATION VIDEO
+       Uncomment and configure the video element below to add the
+       NOVA AI robot animation in a future update.
+       Recommended: looping WebM/MP4, transparent background preferred.
+       Position this inside the hero overlay or as a separate fixed layer.
+       ═══════════════════════════════════════════════════════════════ -->
   <!--
   <div id="nova-video-container" style="position:fixed;bottom:40px;right:40px;z-index:30;width:220px;pointer-events:none">
     <video id="nova-video" autoplay loop muted playsinline style="width:100%">
@@ -291,7 +220,7 @@ const shieldImg   = document.getElementById('shield-img');
 const flash       = document.getElementById('flash');
 const meltCanvas  = document.getElementById('melt-canvas');
 const threeCanvas = document.getElementById('three-canvas');
-const scrollContent = document.getElementById('scroll-content');
+const heroOverlay = document.getElementById('hero-overlay');
 
 /* ── Web Audio — chime + whoosh + thud ─────────────────────────── */
 function makeAudioCtx() {
@@ -350,7 +279,7 @@ function playIntroSound(ctx) {
 /* ── Reveal hero scene ──────────────────────────────────────────── */
 function revealHero() {
   threeCanvas.classList.add('reveal');
-  scrollContent.classList.add('reveal');
+  heroOverlay.classList.add('reveal');
 }
 
 /* ── Melt dissolve — solid black canvas drips away to reveal hero ─ */
@@ -449,233 +378,173 @@ enterScreen.addEventListener('click', () => {
 });
 
 /* ════════════════════════════════════════════════════════════════
-   THREE.JS — scroll-driven multi-scene 3D background
-   § Hero: glass orb  § Auto: node graph  § Globe: point sphere
-   § Streams: data flows  — mouse parallax throughout
+   THREE.JS — 3D HERO SCENE
+   Glass orb · Fresnel shader · floor reflection · bg sphere · dust
 ════════════════════════════════════════════════════════════════ */
 (function initThree() {
   const W = window.innerWidth, H = window.innerHeight;
-  const renderer = new THREE.WebGLRenderer({canvas:threeCanvas, antialias:!isMobile, alpha:true});
+  const renderer = new THREE.WebGLRenderer({canvas: threeCanvas, antialias: !isMobile, alpha: true});
   renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
   renderer.setSize(W, H);
   renderer.setClearColor(0x000000, 1);
 
   const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 100);
   camera.position.set(0, 1.4, 5.5);
-  scene.fog = new THREE.FogExp2(0x000000, 0.042);
+  camera.lookAt(0, 0.5, 0);
+
+  scene.fog = new THREE.FogExp2(0x000000, 0.055);
 
   /* Lights */
   scene.add(new THREE.AmbientLight(0x1a1200, 0.6));
   const keyLight = new THREE.PointLight(0xD4AF37, 2.8, 18);
-  keyLight.position.set(3,5,4); scene.add(keyLight);
-  scene.add(Object.assign(new THREE.PointLight(0x4422aa,1.2,14),{position:new THREE.Vector3(-4,2,-2)}));
-  scene.add(Object.assign(new THREE.PointLight(0xF5E7A0,1.6,12),{position:new THREE.Vector3(0,6,-3)}));
+  keyLight.position.set(3, 5, 4);
+  scene.add(keyLight);
+  const fillLight = new THREE.PointLight(0x4422aa, 1.2, 14);
+  fillLight.position.set(-4, 2, -2);
+  scene.add(fillLight);
+  scene.add(Object.assign(new THREE.PointLight(0xF5E7A0, 1.6, 12), {position: new THREE.Vector3(0, 6, -3)}));
 
-  /* Fresnel glass shader */
-  function makeGlassMat(hex, baseOp, fresnelExp, specStr) {
+  /* Fresnel glass material */
+  function makeGlassMat(hex, opacity, fresnelExp, specStr) {
     return new THREE.ShaderMaterial({
-      uniforms:{uColor:{value:new THREE.Color(hex)},uOpacity:{value:baseOp},uFresnel:{value:fresnelExp},uSpec:{value:specStr},uCamPos:{value:camera.position},uLightPos:{value:new THREE.Vector3(3,5,4)}},
-      vertexShader:`varying vec3 vWNormal,vWPos;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vWPos=wp.xyz;vWNormal=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*wp;}`,
-      fragmentShader:`uniform vec3 uColor,uCamPos,uLightPos;uniform float uOpacity,uFresnel,uSpec;varying vec3 vWNormal,vWPos;void main(){vec3 N=normalize(vWNormal);vec3 V=normalize(uCamPos-vWPos);vec3 L=normalize(uLightPos-vWPos);vec3 H=normalize(L+V);float rim=pow(clamp(1.0-dot(N,V),0.0,1.0),uFresnel);float spec=pow(max(dot(N,H),0.0),90.0)*uSpec;vec3 col=mix(uColor*0.06,uColor*1.35,rim)+vec3(1.0,0.94,0.72)*spec;float alpha=clamp(mix(0.03,0.92,rim*rim)*uOpacity+spec*0.55,0.0,1.0);gl_FragColor=vec4(col,alpha);}`,
-      transparent:true,side:THREE.FrontSide,depthWrite:false,
+      uniforms: {
+        uColor:    { value: new THREE.Color(hex) },
+        uOpacity:  { value: opacity },
+        uFresnel:  { value: fresnelExp },
+        uSpec:     { value: specStr },
+        uCamPos:   { value: camera.position },
+        uLightPos: { value: new THREE.Vector3(3, 5, 4) },
+      },
+      vertexShader:`
+        varying vec3 vWNormal,vWPos;
+        void main(){
+          vec4 wp=modelMatrix*vec4(position,1.0);
+          vWPos=wp.xyz;
+          vWNormal=normalize(mat3(modelMatrix)*normal);
+          gl_Position=projectionMatrix*viewMatrix*wp;
+        }`,
+      fragmentShader:`
+        uniform vec3 uColor,uCamPos,uLightPos;
+        uniform float uOpacity,uFresnel,uSpec;
+        varying vec3 vWNormal,vWPos;
+        void main(){
+          vec3 N=normalize(vWNormal);
+          vec3 V=normalize(uCamPos-vWPos);
+          vec3 L=normalize(uLightPos-vWPos);
+          vec3 H=normalize(L+V);
+          float rim=pow(clamp(1.0-dot(N,V),0.0,1.0),uFresnel);
+          float spec=pow(max(dot(N,H),0.0),90.0)*uSpec;
+          vec3 col=mix(uColor*0.06,uColor*1.35,rim)+vec3(1.0,0.94,0.72)*spec;
+          float alpha=clamp(mix(0.03,0.92,rim*rim)*uOpacity+spec*0.55,0.0,1.0);
+          gl_FragColor=vec4(col,alpha);
+        }`,
+      transparent:true, side:THREE.FrontSide, depthWrite:false,
     });
   }
 
-  /* Fade utility — traverses group, scales material opacity by alpha */
-  function setAlpha(group, alpha) {
-    group.traverse(obj => {
-      if (!obj.material) return;
-      if (obj.material.uniforms && obj.material.uniforms.uOpacity !== undefined) {
-        obj.material.uniforms.uOpacity.value = alpha * (obj.userData.baseOp || 1);
-      } else if ('opacity' in obj.material) {
-        obj.material.opacity = alpha * (obj.userData.baseOp || 1);
-      }
-    });
-  }
-
-  /* ── § HERO GROUP — glass orb ──────────────────────────────── */
-  const heroGroup = new THREE.Group();
+  /* Glass orb */
   const segs = isMobile ? 32 : 64;
+  const orb  = new THREE.Mesh(
+    new THREE.SphereGeometry(1.1, segs, segs),
+    makeGlassMat(0xD4AF37, 1.0, 2.8, 1.8)
+  );
+  orb.position.set(0, 0.8, 0);
+  scene.add(orb);
 
-  const orb = new THREE.Mesh(new THREE.SphereGeometry(1.1,segs,segs), makeGlassMat(0xD4AF37,1.0,2.8,1.8));
-  orb.position.set(0,0.8,0); orb.userData.baseOp = 1.0;
-  heroGroup.add(orb);
-  const innerGlow = new THREE.Mesh(new THREE.SphereGeometry(0.75,segs,segs), makeGlassMat(0xF5E7A0,0.55,4.5,0.6));
-  innerGlow.userData.baseOp = 0.55; orb.add(innerGlow);
+  /* Inner glow */
+  orb.add(new THREE.Mesh(
+    new THREE.SphereGeometry(0.75, segs, segs),
+    makeGlassMat(0xF5E7A0, 0.55, 4.5, 0.6)
+  ));
 
-  const bgSphere = new THREE.Mesh(new THREE.SphereGeometry(isMobile?7:9,24,24),
-    new THREE.MeshBasicMaterial({color:0x0d0a04,side:THREE.BackSide,transparent:true,opacity:0.92}));
-  bgSphere.userData.baseOp = 0.92; heroGroup.add(bgSphere);
+  /* Background sphere */
+  scene.add(new THREE.Mesh(
+    new THREE.SphereGeometry(isMobile ? 7 : 9, 24, 24),
+    new THREE.MeshBasicMaterial({color:0x0d0a04, side:THREE.BackSide, transparent:true, opacity:0.92})
+  ));
 
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(isMobile?5.5:7,0.008,4,120),
-    new THREE.MeshBasicMaterial({color:0x3a2800,transparent:true,opacity:0.45}));
-  ring.rotation.x = Math.PI/2.4; ring.userData.baseOp = 0.45; heroGroup.add(ring);
+  /* Decorative ring */
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(isMobile ? 5.5 : 7, 0.008, 4, 120),
+    new THREE.MeshBasicMaterial({color:0x3a2800, transparent:true, opacity:0.45})
+  );
+  ring.rotation.x = Math.PI / 2.4;
+  scene.add(ring);
 
-  const fc=document.createElement('canvas'); fc.width=fc.height=512;
-  const fx=fc.getContext('2d'),fg=fx.createRadialGradient(256,256,0,256,256,256);
-  fg.addColorStop(0,'rgba(212,175,55,0.22)');fg.addColorStop(0.4,'rgba(180,140,40,0.10)');fg.addColorStop(1,'rgba(0,0,0,0)');
-  fx.fillStyle=fg;fx.fillRect(0,0,512,512);
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(10,10),
-    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(fc),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
-  floor.rotation.x=-Math.PI/2; floor.position.y=-0.3; floor.userData.baseOp=1; heroGroup.add(floor);
+  /* Floor reflection */
+  const fc = document.createElement('canvas');
+  fc.width = fc.height = 512;
+  const fx = fc.getContext('2d');
+  const fg = fx.createRadialGradient(256,256,0,256,256,256);
+  fg.addColorStop(0,   'rgba(212,175,55,0.22)');
+  fg.addColorStop(0.4, 'rgba(180,140,40,0.10)');
+  fg.addColorStop(1,   'rgba(0,0,0,0)');
+  fx.fillStyle = fg; fx.fillRect(0,0,512,512);
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(10,10),
+    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(fc), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending})
+  );
+  floor.rotation.x = -Math.PI/2; floor.position.y = -0.3;
+  scene.add(floor);
 
-  const hc=document.createElement('canvas'); hc.width=hc.height=256;
-  const hx=hc.getContext('2d'),hg=hx.createRadialGradient(128,128,0,128,128,128);
-  hg.addColorStop(0,'rgba(245,231,160,0.35)');hg.addColorStop(0.5,'rgba(212,175,55,0.12)');hg.addColorStop(1,'rgba(0,0,0,0)');
-  hx.fillStyle=hg;hx.fillRect(0,0,256,256);
-  const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(hc),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
-  halo.scale.set(4.5,4.5,1); halo.position.set(0,0.8,0); halo.userData.baseOp=1; heroGroup.add(halo);
+  /* Atmospheric halo sprite */
+  const hc = document.createElement('canvas');
+  hc.width = hc.height = 256;
+  const hx = hc.getContext('2d');
+  const hg = hx.createRadialGradient(128,128,0,128,128,128);
+  hg.addColorStop(0,   'rgba(245,231,160,0.35)');
+  hg.addColorStop(0.5, 'rgba(212,175,55,0.12)');
+  hg.addColorStop(1,   'rgba(0,0,0,0)');
+  hx.fillStyle = hg; hx.fillRect(0,0,256,256);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+    map:new THREE.CanvasTexture(hc), transparent:true,
+    blending:THREE.AdditiveBlending, depthWrite:false,
+  }));
+  halo.scale.set(4.5, 4.5, 1);
+  halo.position.set(0, 0.8, 0);
+  scene.add(halo);
 
+  /* Dust particles — desktop only */
   if (!isMobile) {
-    const N=320,dpos=new Float32Array(N*3);
-    for(let i=0;i<N;i++){dpos[i*3]=(Math.random()-.5)*14;dpos[i*3+1]=(Math.random()-.5)*7+1;dpos[i*3+2]=(Math.random()-.5)*10;}
-    const dustGeo=new THREE.BufferGeometry(); dustGeo.setAttribute('position',new THREE.BufferAttribute(dpos,3));
-    const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:0xD4AF37,size:0.018,transparent:true,opacity:0.45,blending:THREE.AdditiveBlending,depthWrite:false}));
-    dust.userData.baseOp=0.45; heroGroup.add(dust);
+    const N   = 320;
+    const pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      pos[i*3]   = (Math.random()-.5)*14;
+      pos[i*3+1] = (Math.random()-.5)*7+1;
+      pos[i*3+2] = (Math.random()-.5)*10;
+    }
+    const ptGeo = new THREE.BufferGeometry();
+    ptGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    scene.add(new THREE.Points(ptGeo, new THREE.PointsMaterial({
+      color:0xD4AF37, size:0.018, transparent:true, opacity:0.45,
+      blending:THREE.AdditiveBlending, depthWrite:false,
+    })));
   }
-  scene.add(heroGroup);
 
-  /* ── § AUTO GROUP — node network ──────────────────────────── */
-  const autoGroup = new THREE.Group();
-  const nodeCount = isMobile ? 16 : 28;
-  const nodeMeshes = [], nodePositions = [];
-  for (let i=0; i<nodeCount; i++) {
-    const m = new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),
-      new THREE.MeshBasicMaterial({color:0xD4AF37,transparent:true,opacity:0.9}));
-    m.userData.baseOp = 0.9; m.userData.phase = Math.random()*Math.PI*2;
-    const p = new THREE.Vector3((Math.random()-.5)*8,(Math.random()-.5)*5,(Math.random()-.5)*5);
-    m.position.copy(p); nodePositions.push(p); nodeMeshes.push(m); autoGroup.add(m);
-  }
-  const edgeV=[];
-  for(let i=0;i<nodeCount;i++) for(let j=i+1;j<nodeCount;j++)
-    if(nodePositions[i].distanceTo(nodePositions[j])<2.7) edgeV.push(...nodePositions[i].toArray(),...nodePositions[j].toArray());
-  const edgeGeo=new THREE.BufferGeometry(); edgeGeo.setAttribute('position',new THREE.Float32BufferAttribute(edgeV,3));
-  const edgeLine = new THREE.LineSegments(edgeGeo,new THREE.LineBasicMaterial({color:0x9A7008,transparent:true,opacity:0.3}));
-  edgeLine.userData.baseOp=0.3; autoGroup.add(edgeLine);
-  autoGroup.visible=false; scene.add(autoGroup);
+  /* Resize */
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
 
-  /* ── § GLOBE GROUP — fibonacci point sphere + arcs ─────── */
-  const globeGroup = new THREE.Group();
-  const globeN=isMobile?260:600, globeR=2.5;
-  const gPos=new Float32Array(globeN*3), phi=Math.PI*(3-Math.sqrt(5));
-  for(let i=0;i<globeN;i++){
-    const y=1-(i/(globeN-1))*2,r=Math.sqrt(Math.max(0,1-y*y)),th=phi*i;
-    gPos[i*3]=Math.cos(th)*r*globeR; gPos[i*3+1]=y*globeR; gPos[i*3+2]=Math.sin(th)*r*globeR;
-  }
-  const gGeo=new THREE.BufferGeometry(); gGeo.setAttribute('position',new THREE.BufferAttribute(gPos,3));
-  const globePts=new THREE.Points(gGeo,new THREE.PointsMaterial({color:0xD4AF37,size:isMobile?.045:.027,transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}));
-  globePts.userData.baseOp=0.8; globeGroup.add(globePts);
-  for(let a=0;a<(isMobile?3:6);a++){
-    const i1=Math.floor(Math.random()*globeN),i2=Math.floor(Math.random()*globeN);
-    const p1=new THREE.Vector3(gPos[i1*3],gPos[i1*3+1],gPos[i1*3+2]);
-    const p2=new THREE.Vector3(gPos[i2*3],gPos[i2*3+1],gPos[i2*3+2]);
-    const apex=p1.clone().add(p2).multiplyScalar(.5).normalize().multiplyScalar(globeR*1.45);
-    const arc=new THREE.Mesh(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(p1,apex,p2),22,.009,3,false),
-      new THREE.MeshBasicMaterial({color:0xF5E7A0,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending}));
-    arc.userData.baseOp=0.5; globeGroup.add(arc);
-  }
-  globeGroup.visible=false; scene.add(globeGroup);
-
-  /* ── § STREAM GROUP — data flow particles ───────────────── */
-  const streamGroup = new THREE.Group();
-  const sCount=isMobile?4:9, sPts=isMobile?35:65;
-  for(let s=0;s<sCount;s++){
-    const a=new THREE.Vector3((Math.random()-.5)*10,(Math.random()-.5)*5,(Math.random()-.5)*4);
-    const b=new THREE.Vector3((Math.random()-.5)*4,(Math.random()-.5)*3,(Math.random()-.5)*3);
-    const c=new THREE.Vector3((Math.random()-.5)*10,(Math.random()-.5)*5,(Math.random()-.5)*4);
-    const sGeo=new THREE.BufferGeometry();
-    sGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(sPts*3),3));
-    const pts=new THREE.Points(sGeo,new THREE.PointsMaterial({color:0xD4AF37,size:.033,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false}));
-    pts.userData={baseOp:.65,curve:new THREE.CatmullRomCurve3([a,b,c]),offset:Math.random()};
-    streamGroup.add(pts);
-  }
-  streamGroup.visible=false; scene.add(streamGroup);
-
-  /* ── Mouse parallax ────────────────────────────────────── */
-  let mX=0, mY=0;
-  window.addEventListener('mousemove',e=>{mX=(e.clientX/innerWidth-.5)*2;mY=(e.clientY/innerHeight-.5)*2;});
-
-  /* ── Scroll sync ────────────────────────────────────────── */
-  let scrollT=0;
-  const scEl=document.getElementById('scroll-content');
-  scEl && scEl.addEventListener('scroll',()=>{ scrollT=scEl.scrollTop/innerHeight; });
-
-  /* ── Resize ─────────────────────────────────────────────── */
-  window.addEventListener('resize',()=>{const w=innerWidth,h=innerHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);});
-
-  /* ── Utils ──────────────────────────────────────────────── */
-  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-  const ss=t=>t*t*(3-2*t);
-  const lerp=(a,b,t)=>a+(b-a)*t;
-
-  /* Camera waypoints per section [x, y, z, lookY] */
-  const cams=[[0,1.4,5.5,.6],[0,.2,9.5,0],[0,.8,10.5,.4],[0,.2,8.5,0],[0,.8,6.5,.4]];
-
-  /* ── Animate ─────────────────────────────────────────────── */
-  let t=0;
-  (function loop(){
+  /* Animate */
+  let t = 0;
+  (function loop() {
     requestAnimationFrame(loop);
-    t+=0.008;
-    const sT=scrollT;
-
-    /* Per-scene alpha using smooth bell curves */
-    const hA  = ss(clamp(1.4-sT,0,1));
-    const aA  = ss(clamp(1-Math.abs(sT-1)*1.3,0,1));
-    const gA  = ss(clamp(1-Math.abs(sT-2)*1.3,0,1));
-    const stA = ss(clamp(1-Math.abs(sT-3)*1.3,0,1));
-
-    heroGroup.visible   = hA  >0.005; if(heroGroup.visible)  setAlpha(heroGroup,  hA);
-    autoGroup.visible   = aA  >0.005; if(autoGroup.visible)  setAlpha(autoGroup,  aA);
-    globeGroup.visible  = gA  >0.005; if(globeGroup.visible) setAlpha(globeGroup, gA);
-    streamGroup.visible = stA >0.005; if(streamGroup.visible)setAlpha(streamGroup,stA);
-
-    /* Camera interpolation + mouse parallax */
-    const ci=clamp(sT,0,cams.length-2), ci0=Math.floor(ci), cf=ss(ci-ci0);
-    const [x0,y0,z0,ly0]=cams[ci0],[x1,y1,z1,ly1]=cams[Math.min(ci0+1,cams.length-1)];
-    camera.position.x=lerp(x0,x1,cf)+mX*.38+Math.sin(t*.12)*.14;
-    camera.position.y=lerp(y0,y1,cf)-mY*.22+Math.sin(t*.17)*.08;
-    camera.position.z=lerp(z0,z1,cf);
-    camera.lookAt(mX*-.15, lerp(ly0,ly1,cf), 0);
-
-    /* Hero animations */
-    if(heroGroup.visible){
-      orb.rotation.y=t*.28; orb.rotation.z=Math.sin(t*.4)*.06;
-      orb.position.y=0.8+Math.sin(t*.7)*.08;
-      innerGlow.rotation.y=-t*.5;
-      ring.rotation.z=t*.04;
-      keyLight.position.x=Math.sin(t*.5)*4; keyLight.position.z=Math.cos(t*.5)*4;
-      halo.position.y=orb.position.y;
-    }
-
-    /* Auto: slow rotation + node pulse */
-    if(autoGroup.visible){
-      autoGroup.rotation.y=t*.09; autoGroup.rotation.x=Math.sin(t*.04)*.08;
-      nodeMeshes.forEach(m=>{ m.scale.setScalar(1+.22*Math.sin(t*1.4+m.userData.phase)); });
-    }
-
-    /* Globe: rotation + arc pulse */
-    if(globeGroup.visible){
-      globeGroup.rotation.y=t*.06;
-      for(let i=1;i<globeGroup.children.length;i++){
-        const ch=globeGroup.children[i];
-        if(ch.material) ch.material.opacity=gA*.45*(0.4+0.6*Math.sin(t*1.1+i*1.3));
-      }
-    }
-
-    /* Streams: particles travel along curves */
-    if(streamGroup.visible){
-      streamGroup.children.forEach(pts=>{
-        pts.userData.offset=(pts.userData.offset+.004)%1;
-        const arr=pts.geometry.attributes.position.array,N=arr.length/3;
-        for(let i=0;i<N;i++){
-          const p=pts.userData.curve.getPoint(((i/N)+pts.userData.offset)%1);
-          arr[i*3]=p.x;arr[i*3+1]=p.y;arr[i*3+2]=p.z;
-        }
-        pts.geometry.attributes.position.needsUpdate=true;
-      });
-    }
-
+    t += 0.008;
+    orb.rotation.y = t * 0.28;
+    orb.rotation.z = Math.sin(t * 0.4) * 0.06;
+    orb.position.y = 0.8 + Math.sin(t * 0.7) * 0.08;
+    orb.children[0].rotation.y = -t * 0.5;
+    ring.rotation.z = t * 0.04;
+    keyLight.position.x = Math.sin(t * 0.5) * 4;
+    keyLight.position.z = Math.cos(t * 0.5) * 4;
+    halo.position.y = orb.position.y;
+    camera.position.x = Math.sin(t * 0.12) * 0.35;
+    camera.position.y = 1.4 + Math.sin(t * 0.18) * 0.12;
+    camera.lookAt(0, 0.6, 0);
     renderer.render(scene, camera);
   })();
 })();
