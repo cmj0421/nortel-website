@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nortel Network Group, LLC</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Georgia',serif}
+
+/* ── Enter screen — full-screen tap area ──────────────────────── */
+#enter-screen{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#000;cursor:pointer;
+  user-select:none;-webkit-user-select:none;
+}
+#enter-screen.hidden{display:none}
+
+.enter-logo{
+  width:130px;height:130px;object-fit:contain;
+  margin-bottom:44px;
+  filter:drop-shadow(0 0 40px rgba(212,175,55,.32)) drop-shadow(0 0 10px rgba(212,175,55,.15));
+  animation:floatLogo 3.4s ease-in-out infinite;
+}
+@keyframes floatLogo{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+
+.enter-tap{
+  font-size:12px;letter-spacing:.42em;text-transform:uppercase;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:tapPulse 2.6s ease-in-out infinite;
+}
+@keyframes tapPulse{
+  0%,100%{opacity:.78}
+  50%{opacity:1}
+}
+
+/* ── Shield / logo rush ───────────────────────────────────────── */
+#shield-wrap{
+  position:fixed;inset:0;z-index:90;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+  perspective:900px;
+  opacity:0;visibility:hidden;
+  transition:opacity .25s;
+}
+#shield-wrap.active{opacity:1;visibility:visible}
+
+#shield-img{
+  width:140px;height:140px;object-fit:contain;
+  transform:scale(0.02) rotateY(0deg);
+  transform-origin:center center;
+  filter:drop-shadow(0 0 10px rgba(212,175,55,.35));
+  will-change:transform,filter;
+}
+
+/* ── Screen shake ─────────────────────────────────────────────── */
+body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes screenShake{
+  10%,90%{transform:translate(-2px,1px)}
+  20%,80%{transform:translate(3px,-2px)}
+  30%,50%,70%{transform:translate(-3px,2px)}
+  40%,60%{transform:translate(3px,-1px)}
+}
+
+/* ── Gold flash overlay — behind shield so logo stays visible ─── */
+#flash{
+  position:fixed;inset:0;z-index:85;
+  background:radial-gradient(ellipse at center,rgba(245,231,160,.6) 0%,rgba(212,175,55,.4) 45%,rgba(184,134,11,.15) 75%,transparent 100%);
+  opacity:0;pointer-events:none;
+  transition:opacity .08s;
+}
+#flash.pop{opacity:1}
+#flash.fade{opacity:0;transition:opacity .6s ease-out}
+
+/* ── Melt canvas — above shield so it covers then drips away ─── */
+#melt-canvas{
+  position:fixed;inset:0;z-index:92;
+  pointer-events:none;
+  opacity:0;transition:opacity .5s ease-out;
+}
+#melt-canvas.visible{opacity:1}
+
+/* ── Three.js canvas ──────────────────────────────────────────── */
+#three-canvas{
+  position:fixed;inset:0;z-index:10;
+  opacity:0;transition:opacity 0.4s ease-out;
+}
+#three-canvas.reveal{opacity:1}
+
+/* ── Hero overlay ─────────────────────────────────────────────── */
+#hero-overlay{
+  position:fixed;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;
+  opacity:0;transition:opacity 0.9s ease-out 0.2s;
+}
+#hero-overlay.reveal{opacity:1;pointer-events:auto}
+
+.hero-logo-wrap{margin-bottom:28px;text-align:center}
+.hero-logo-img{
+  width:72px;height:72px;object-fit:contain;
+  filter:drop-shadow(0 0 14px rgba(212,175,55,.55));
+}
+.hero-company{
+  font-size:clamp(1.4rem,3.8vw,2.7rem);
+  font-weight:700;letter-spacing:.05em;line-height:1.2;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-align:center;padding:0 24px;
+}
+.hero-tagline{
+  margin-top:12px;font-size:clamp(.78rem,1.4vw,.9rem);
+  letter-spacing:.14em;text-align:center;padding:0 24px;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-divider{
+  width:120px;height:1px;margin:28px auto;
+  background:linear-gradient(90deg,transparent,rgba(212,175,55,.5),transparent);
+}
+.hero-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 36px;border-radius:4px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  background-size:200% 100%;
+  font-size:15px;font-weight:700;letter-spacing:.08em;color:#1a0e00;
+  text-decoration:none;
+  box-shadow:0 4px 20px rgba(212,175,55,.32),0 1px 0 rgba(245,231,160,.35) inset,0 -1px 0 rgba(100,65,0,.4) inset;
+  transition:transform .18s,box-shadow .18s;
+}
+.hero-cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 40px rgba(212,175,55,.5),0 4px 16px rgba(212,175,55,.3),0 1px 0 rgba(245,231,160,.35) inset;
+}
+.hero-sub{
+  margin-top:18px;font-size:11px;letter-spacing:.18em;text-align:center;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-enter-site{
+  margin-top:32px;
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  border-bottom:1px solid rgba(212,175,55,.45);
+  transition:filter .2s,border-color .2s;
+}
+.hero-enter-site:hover{filter:brightness(1.25);border-color:rgba(212,175,55,.8)}
+</style>
+</head>
+<body>
+
+<!-- ══ ENTER SCREEN — full screen is tappable ════════════════════ -->
+<div id="enter-screen">
+  <img src="logo.png" alt="Nortel Network Group" class="enter-logo">
+  <p class="enter-tap">Tap to enter</p>
+</div>
+
+<!-- ══ SHIELD RUSH ═══════════════════════════════════════════════ -->
+<div id="shield-wrap">
+  <img id="shield-img" src="logo.png" alt="">
+</div>
+
+<!-- ══ GOLD FLASH ════════════════════════════════════════════════ -->
+<div id="flash"></div>
+
+<!-- ══ MELT CANVAS ═══════════════════════════════════════════════ -->
+<canvas id="melt-canvas"></canvas>
+
+<!-- ══ THREE.JS CANVAS ═══════════════════════════════════════════ -->
+<canvas id="three-canvas"></canvas>
+
+<!-- ══ HERO OVERLAY ══════════════════════════════════════════════ -->
+<div id="hero-overlay">
+  <div class="hero-logo-wrap">
+    <img src="logo.png" class="hero-logo-img" alt="Nortel Network Group">
+  </div>
+  <div class="hero-company">Nortel Network Group, LLC</div>
+  <div class="hero-tagline">Intelligence. Engineered for Growth.</div>
+  <div class="hero-divider"></div>
+  <a href="tel:+12137554907" class="hero-cta">
+    <span>📞</span><span>Call NOVA</span>
+  </a>
+  <p class="hero-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
+  <a href="index.html" class="hero-enter-site">Enter Site →</a>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PHASE 2: NOVA ROBOT ANIMATION VIDEO
+       Uncomment and configure the video element below to add the
+       NOVA AI robot animation in a future update.
+       Recommended: looping WebM/MP4, transparent background preferred.
+       Position this inside the hero overlay or as a separate fixed layer.
+       ═══════════════════════════════════════════════════════════════ -->
+  <!--
+  <div id="nova-video-container" style="position:fixed;bottom:40px;right:40px;z-index:30;width:220px;pointer-events:none">
+    <video id="nova-video" autoplay loop muted playsinline style="width:100%">
+      <source src="nova-robot.webm" type="video/webm">
+      <source src="nova-robot.mp4"  type="video/mp4">
+    </video>
+  </div>
+  -->
+</div>
+
+<!-- ══ THREE.JS ══════════════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ── Constants & state ──────────────────────────────────────────── */
+const isMobile     = window.innerWidth < 768;
+
+const enterScreen = document.getElementById('enter-screen');
+const shieldWrap  = document.getElementById('shield-wrap');
+const shieldImg   = document.getElementById('shield-img');
+const flash       = document.getElementById('flash');
+const meltCanvas  = document.getElementById('melt-canvas');
+const threeCanvas = document.getElementById('three-canvas');
+const heroOverlay = document.getElementById('hero-overlay');
+
+/* ── Web Audio — chime + whoosh + thud ─────────────────────────── */
+function makeAudioCtx() {
+  try { return new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
+}
+
+function playIntroSound(ctx) {
+  if (!ctx) return;
+  const now = ctx.currentTime;
+
+  /* Chime: stacked sine tones in D-major pentatonic */
+  [293.66, 369.99, 440.00, 587.33, 739.99].forEach((freq, i) => {
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, now + i * 0.07);
+    gain.gain.linearRampToValueAtTime(0.18, now + i * 0.07 + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.07 + 1.4);
+    osc.start(now + i * 0.07);
+    osc.stop(now + i * 0.07 + 1.5);
+  });
+
+  /* Whoosh: filtered noise sweep */
+  const bufLen = ctx.sampleRate * 3.5;
+  const buf    = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+  const data   = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+  const src    = ctx.createBufferSource();
+  src.buffer   = buf;
+  const bpf    = ctx.createBiquadFilter();
+  bpf.type = 'bandpass';
+  bpf.frequency.setValueAtTime(200, now + 0.3);
+  bpf.frequency.exponentialRampToValueAtTime(3200, now + 2.8);
+  bpf.Q.value = 1.5;
+  const gW = ctx.createGain();
+  gW.gain.setValueAtTime(0, now + 0.3);
+  gW.gain.linearRampToValueAtTime(0.22, now + 0.7);
+  gW.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
+  src.connect(bpf); bpf.connect(gW); gW.connect(ctx.destination);
+  src.start(now + 0.3);
+
+  /* Impact thud */
+  const tBuf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+  const td   = tBuf.getChannelData(0);
+  for (let i = 0; i < tBuf.length; i++) td[i] = (Math.random()*2-1) * Math.exp(-i/(ctx.sampleRate*0.07));
+  const tSrc = ctx.createBufferSource(); tSrc.buffer = tBuf;
+  const lpf  = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 140;
+  const gT   = ctx.createGain();
+  gT.gain.setValueAtTime(0.9, now + 2.88);
+  gT.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
+  tSrc.connect(lpf); lpf.connect(gT); gT.connect(ctx.destination);
+  tSrc.start(now + 2.88);
+}
+
+/* ── Reveal hero scene ──────────────────────────────────────────── */
+function revealHero() {
+  threeCanvas.classList.add('reveal');
+  heroOverlay.classList.add('reveal');
+}
+
+/* ── Melt dissolve — solid black canvas drips away to reveal hero ─ */
+function runMeltDissolve() {
+  const mc  = meltCanvas;
+  const ctx = mc.getContext('2d');
+  mc.width  = window.innerWidth;
+  mc.height = window.innerHeight;
+
+  /* Black cover — as columns drip away, the hero scene shows through */
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, mc.width, mc.height);
+  mc.classList.add('visible');
+
+  /* Start hero reveal immediately — fades in as drips expose it */
+  revealHero();
+
+  const COLS   = isMobile ? 80 : 160;
+  const colW   = Math.ceil(mc.width / COLS);
+  const drops  = Array.from({length: COLS}, () => 0);
+  const speeds = Array.from({length: COLS}, () => mc.height * (0.014 + Math.random() * 0.026));
+  const done   = new Uint8Array(COLS);
+  let finished = 0;
+
+  function step() {
+    for (let c = 0; c < COLS; c++) {
+      if (done[c]) continue;
+      drops[c] += speeds[c];
+      ctx.clearRect(c * colW, 0, colW, drops[c]);
+      if (drops[c] >= mc.height) { done[c] = 1; finished++; }
+    }
+    if (finished < COLS) { requestAnimationFrame(step); }
+    else { mc.classList.remove('visible'); } /* CSS transition fades out */
+  }
+  requestAnimationFrame(step);
+}
+
+/* ── Shield fly-in — JS driven so spin is visible at every scale ── */
+function runShieldIntro(audioCtx) {
+  playIntroSound(audioCtx);
+  enterScreen.classList.add('hidden');
+  shieldWrap.classList.add('active');
+
+  const DURATION = 3000;
+  const startTime = performance.now();
+
+  function animFrame(now) {
+    const t = Math.min((now - startTime) / DURATION, 1);
+
+    /* Scale: cubic ease-in (dot → medium centered size, ~40-50% screen height) */
+    const scale = 0.02 + Math.pow(t, 3) * 2.98;
+
+    /* Rotation: smooth-step peaks mid-approach when logo is a visible size.
+       6 full rotations (2160°) concentrated in the t=0.25–0.75 window. */
+    const rotEased = t * t * (3 - 2 * t);   /* smooth-step 0→1 */
+    const rotDeg   = rotEased * 2160;
+
+    /* Glow intensifies as it closes in */
+    const glowR = (8  + t * 32).toFixed(1);
+    const glowA = (0.3 + t * 0.7).toFixed(2);
+    shieldImg.style.transform = `scale(${scale.toFixed(4)}) rotateY(${rotDeg.toFixed(1)}deg)`;
+    shieldImg.style.filter    = `drop-shadow(0 0 ${glowR}px rgba(212,175,55,${glowA}))`;
+
+    if (t < 1) {
+      requestAnimationFrame(animFrame);
+    } else {
+      onImpact();
+    }
+  }
+
+  requestAnimationFrame(animFrame);
+}
+
+/* ── Impact — subtle flash that stays behind the logo ───────────── */
+function onImpact() {
+  document.body.classList.add('shake');
+  setTimeout(() => document.body.classList.remove('shake'), 420);
+
+  /* Flash is z:85, shield is z:90 — logo remains fully visible */
+  flash.classList.add('pop');
+  setTimeout(() => { flash.classList.add('fade'); flash.classList.remove('pop'); }, 130);
+
+  /* Hold logo clearly readable for 0.8s, then melt into site */
+  setTimeout(() => {
+    shieldWrap.style.transition = 'opacity 0.25s';
+    shieldWrap.style.opacity    = '0';
+    runMeltDissolve();
+  }, 800);
+}
+
+/* ── Entry point ────────────────────────────────────────────────── */
+enterScreen.addEventListener('click', () => {
+  const actx = makeAudioCtx();
+  const go   = () => runShieldIntro(actx);
+  if (actx && actx.state === 'suspended') { actx.resume().then(go); } else { go(); }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   THREE.JS — 3D HERO SCENE
+   Glass orb · Fresnel shader · floor reflection · bg sphere · dust
+════════════════════════════════════════════════════════════════ */
+(function initThree() {
+  const W = window.innerWidth, H = window.innerHeight;
+  const renderer = new THREE.WebGLRenderer({canvas: threeCanvas, antialias: !isMobile, alpha: true});
+  renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.setClearColor(0x000000, 1);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 100);
+  camera.position.set(0, 1.4, 5.5);
+  camera.lookAt(0, 0.5, 0);
+
+  scene.fog = new THREE.FogExp2(0x000000, 0.055);
+
+  /* Lights */
+  scene.add(new THREE.AmbientLight(0x1a1200, 0.6));
+  const keyLight = new THREE.PointLight(0xD4AF37, 2.8, 18);
+  keyLight.position.set(3, 5, 4);
+  scene.add(keyLight);
+  const fillLight = new THREE.PointLight(0x4422aa, 1.2, 14);
+  fillLight.position.set(-4, 2, -2);
+  scene.add(fillLight);
+  scene.add(Object.assign(new THREE.PointLight(0xF5E7A0, 1.6, 12), {position: new THREE.Vector3(0, 6, -3)}));
+
+  /* Fresnel glass material */
+  function makeGlassMat(hex, opacity, fresnelExp, specStr) {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uColor:    { value: new THREE.Color(hex) },
+        uOpacity:  { value: opacity },
+        uFresnel:  { value: fresnelExp },
+        uSpec:     { value: specStr },
+        uCamPos:   { value: camera.position },
+        uLightPos: { value: new THREE.Vector3(3, 5, 4) },
+      },
+      vertexShader:`
+        varying vec3 vWNormal,vWPos;
+        void main(){
+          vec4 wp=modelMatrix*vec4(position,1.0);
+          vWPos=wp.xyz;
+          vWNormal=normalize(mat3(modelMatrix)*normal);
+          gl_Position=projectionMatrix*viewMatrix*wp;
+        }`,
+      fragmentShader:`
+        uniform vec3 uColor,uCamPos,uLightPos;
+        uniform float uOpacity,uFresnel,uSpec;
+        varying vec3 vWNormal,vWPos;
+        void main(){
+          vec3 N=normalize(vWNormal);
+          vec3 V=normalize(uCamPos-vWPos);
+          vec3 L=normalize(uLightPos-vWPos);
+          vec3 H=normalize(L+V);
+          float rim=pow(clamp(1.0-dot(N,V),0.0,1.0),uFresnel);
+          float spec=pow(max(dot(N,H),0.0),90.0)*uSpec;
+          vec3 col=mix(uColor*0.06,uColor*1.35,rim)+vec3(1.0,0.94,0.72)*spec;
+          float alpha=clamp(mix(0.03,0.92,rim*rim)*uOpacity+spec*0.55,0.0,1.0);
+          gl_FragColor=vec4(col,alpha);
+        }`,
+      transparent:true, side:THREE.FrontSide, depthWrite:false,
+    });
+  }
+
+  /* Glass orb */
+  const segs = isMobile ? 32 : 64;
+  const orb  = new THREE.Mesh(
+    new THREE.SphereGeometry(1.1, segs, segs),
+    makeGlassMat(0xD4AF37, 1.0, 2.8, 1.8)
+  );
+  orb.position.set(0, 0.8, 0);
+  scene.add(orb);
+
+  /* Inner glow */
+  orb.add(new THREE.Mesh(
+    new THREE.SphereGeometry(0.75, segs, segs),
+    makeGlassMat(0xF5E7A0, 0.55, 4.5, 0.6)
+  ));
+
+  /* Background sphere */
+  scene.add(new THREE.Mesh(
+    new THREE.SphereGeometry(isMobile ? 7 : 9, 24, 24),
+    new THREE.MeshBasicMaterial({color:0x0d0a04, side:THREE.BackSide, transparent:true, opacity:0.92})
+  ));
+
+  /* Decorative ring */
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(isMobile ? 5.5 : 7, 0.008, 4, 120),
+    new THREE.MeshBasicMaterial({color:0x3a2800, transparent:true, opacity:0.45})
+  );
+  ring.rotation.x = Math.PI / 2.4;
+  scene.add(ring);
+
+  /* Floor reflection */
+  const fc = document.createElement('canvas');
+  fc.width = fc.height = 512;
+  const fx = fc.getContext('2d');
+  const fg = fx.createRadialGradient(256,256,0,256,256,256);
+  fg.addColorStop(0,   'rgba(212,175,55,0.22)');
+  fg.addColorStop(0.4, 'rgba(180,140,40,0.10)');
+  fg.addColorStop(1,   'rgba(0,0,0,0)');
+  fx.fillStyle = fg; fx.fillRect(0,0,512,512);
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(10,10),
+    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(fc), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending})
+  );
+  floor.rotation.x = -Math.PI/2; floor.position.y = -0.3;
+  scene.add(floor);
+
+  /* Atmospheric halo sprite */
+  const hc = document.createElement('canvas');
+  hc.width = hc.height = 256;
+  const hx = hc.getContext('2d');
+  const hg = hx.createRadialGradient(128,128,0,128,128,128);
+  hg.addColorStop(0,   'rgba(245,231,160,0.35)');
+  hg.addColorStop(0.5, 'rgba(212,175,55,0.12)');
+  hg.addColorStop(1,   'rgba(0,0,0,0)');
+  hx.fillStyle = hg; hx.fillRect(0,0,256,256);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+    map:new THREE.CanvasTexture(hc), transparent:true,
+    blending:THREE.AdditiveBlending, depthWrite:false,
+  }));
+  halo.scale.set(4.5, 4.5, 1);
+  halo.position.set(0, 0.8, 0);
+  scene.add(halo);
+
+  /* Dust particles — desktop only */
+  if (!isMobile) {
+    const N   = 320;
+    const pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      pos[i*3]   = (Math.random()-.5)*14;
+      pos[i*3+1] = (Math.random()-.5)*7+1;
+      pos[i*3+2] = (Math.random()-.5)*10;
+    }
+    const ptGeo = new THREE.BufferGeometry();
+    ptGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    scene.add(new THREE.Points(ptGeo, new THREE.PointsMaterial({
+      color:0xD4AF37, size:0.018, transparent:true, opacity:0.45,
+      blending:THREE.AdditiveBlending, depthWrite:false,
+    })));
+  }
+
+  /* Resize */
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+
+  /* Animate */
+  let t = 0;
+  (function loop() {
+    requestAnimationFrame(loop);
+    t += 0.008;
+    orb.rotation.y = t * 0.28;
+    orb.rotation.z = Math.sin(t * 0.4) * 0.06;
+    orb.position.y = 0.8 + Math.sin(t * 0.7) * 0.08;
+    orb.children[0].rotation.y = -t * 0.5;
+    ring.rotation.z = t * 0.04;
+    keyLight.position.x = Math.sin(t * 0.5) * 4;
+    keyLight.position.z = Math.cos(t * 0.5) * 4;
+    halo.position.y = orb.position.y;
+    camera.position.x = Math.sin(t * 0.12) * 0.35;
+    camera.position.y = 1.4 + Math.sin(t * 0.18) * 0.12;
+    camera.lookAt(0, 0.6, 0);
+    renderer.render(scene, camera);
+  })();
+})();
+</script>
+</body>
+</html>
