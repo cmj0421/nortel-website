@@ -313,6 +313,16 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   color:rgba(212,175,55,.45);
 }
 
+/* ── Mission centerpiece ──────────────────────────────────── */
+.sc-body-em{
+  font-size:clamp(1.25rem,2.4vw,1.55rem);
+  font-weight:700;line-height:1.45;letter-spacing:-.01em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin:32px 0;
+}
+.sc-body+.sc-body,.sc-body+.sc-body-em,.sc-body-em+.sc-body{margin-top:28px}
+
 /* ── How It Works steps ───────────────────────────────────── */
 .sc-steps{
   display:flex;flex-direction:row;gap:40px;
@@ -402,10 +412,13 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
 
   <!-- §2 OUR MISSION -->
   <section id="mission" class="sc-section">
-    <div class="sc-card">
-      <h2 class="sc-heading">Our Mission</h2>
+    <div class="sc-card" style="max-width:820px;text-align:left">
+      <h2 class="sc-heading" style="text-align:center">Our Mission</h2>
       <div class="sc-divider"></div>
-      <p class="sc-body">We were founded on the belief that Black-owned businesses deserve to compete at industry standard — and we lead with that commitment. We bring that same dedication to underserved businesses and companies of all sizes who are ready to grow. Our mission is to elevate every business we serve until they can compete, scale, and win.</p>
+      <p class="sc-body">Black Americans hold over a trillion dollars in spending power — and a growing desire to invest it in their own communities. But too often, the businesses they want to support aren't yet equipped to compete: the customer service, the scheduling, the inventory, the systems. Not because the vision isn't there — because the infrastructure isn't.</p>
+      <p class="sc-body-em">Nortel exists to close that gap.</p>
+      <p class="sc-body">We build Black-owned businesses up to industry standard and beyond — and we bring that same world-class technology, automation, and operational power to underserved and established businesses across every industry. Whoever we serve, the standard is the same: systems that rival the most advanced companies in any market.</p>
+      <p class="sc-body" style="margin-top:28px">This is how communities build lasting wealth — by owning it, running it, and circulating it among their own, the way every thriving community always has. We're here to make that not just possible, but undeniable.</p>
     </div>
   </section>
 
