@@ -277,19 +277,69 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 
-/* ── Vertical scroll progress bar — right edge ───────────── */
-#scroll-progress{
-  position:fixed;right:0;top:0;z-index:48;
+/* ── Vertical scroll progress bars — left & right ────────── */
+.scroll-bar{
+  position:fixed;top:0;z-index:48;
   width:3px;height:100vh;
   background:rgba(212,175,55,.07);
   opacity:0;transition:opacity 0.5s ease-out;
 }
-#scroll-progress.reveal{opacity:1}
-#scroll-fill{
+.scroll-bar.reveal{opacity:1}
+#scroll-left {left:32px}
+#scroll-right{right:32px}
+.scroll-bar-fill{
   width:100%;height:0%;
   background:linear-gradient(to bottom,#9A7008,#D4AF37,#F5E7A0,#D4AF37,#9A7008);
 }
-@media(max-width:680px){#scroll-progress{display:none}}
+@media(max-width:680px){.scroll-bar{display:none}}
+
+/* ── Hero headline upgrade ────────────────────────────────── */
+.sc-headline{
+  margin-top:14px;
+  font-size:clamp(2rem,5vw,3.2rem);
+  font-weight:700;letter-spacing:-0.025em;line-height:1.1;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-subline{
+  margin-top:16px;
+  font-size:clamp(.9rem,1.7vw,1.1rem);line-height:1.75;
+  color:rgba(215,185,95,.75);max-width:560px;
+}
+/* Meet NOVA note */
+.sc-note{
+  margin-top:20px;
+  font-size:.8rem;letter-spacing:.12em;
+  color:rgba(212,175,55,.45);
+}
+
+/* ── How It Works steps ───────────────────────────────────── */
+.sc-steps{
+  display:flex;flex-direction:row;gap:40px;
+  margin-top:12px;text-align:left;
+}
+.sc-step{
+  flex:1;display:flex;flex-direction:column;gap:10px;
+  padding:32px 28px;
+  border:1px solid rgba(212,175,55,.1);border-radius:4px;
+  background:rgba(212,175,55,.03);
+}
+.sc-step-num{
+  font-size:.72rem;font-weight:700;letter-spacing:.3em;
+  color:rgba(212,175,55,.4);
+}
+.sc-step-title{
+  font-size:1.05rem;font-weight:700;letter-spacing:-.01em;line-height:1.25;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-step-body{
+  font-size:.95rem;line-height:1.75;color:rgba(215,185,95,.72);
+}
+@media(max-width:720px){
+  .sc-steps{flex-direction:column;gap:20px}
+  .sc-step{padding:24px 20px}
+}
 </style>
 </head>
 <body>
@@ -324,7 +374,7 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
     <a href="#mission"     class="nav-link">Mission</a>
     <a href="#services"    class="nav-link">What We Do</a>
     <a href="#partnership" class="nav-link">Partnership</a>
-    <a href="tel:+12137554907" class="nav-cta-btn">Call NOVA</a>
+    <a href="tel:+12137554907" class="nav-cta-btn">Talk to NOVA</a>
   </div>
 </nav>
 
@@ -336,9 +386,10 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
     <div class="sc-hero-inner">
       <img src="logo.png" alt="Nortel Network Group" class="sc-logo">
       <div class="sc-company">Nortel Network Group, LLC</div>
-      <div class="sc-tagline">Intelligence. Engineered for Growth.</div>
+      <div class="sc-headline">We Make Businesses Autonomous.</div>
+      <div class="sc-subline">AI that runs your marketing, websites, social, and sales — so your business looks and operates like a market leader, around the clock.</div>
       <div class="sc-divider"></div>
-      <a href="tel:+12137554907" class="sc-cta">📞 Call NOVA</a>
+      <a href="tel:+12137554907" class="sc-cta">📞 Talk to NOVA</a>
       <p class="sc-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
     </div>
     <div class="sc-mouse-cue" id="mouse-cue">
@@ -367,6 +418,34 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
     </div>
   </section>
 
+  <!-- §HOW IT WORKS -->
+  <section id="how-it-works" class="sc-section">
+    <div class="sc-card" style="max-width:900px">
+      <h2 class="sc-heading">How It Works</h2>
+      <div class="sc-divider"></div>
+      <div class="sc-steps">
+        <div class="sc-step">
+          <div class="sc-step-num">01</div>
+          <div class="sc-step-title">Talk to NOVA</div>
+          <p class="sc-step-body">Tell NOVA about your business. She listens, asks the right questions, and understands exactly where you're losing time and customers.</p>
+        </div>
+        <div class="sc-step">
+          <div class="sc-step-num">02</div>
+          <div class="sc-step-title">We Build Your System</div>
+          <p class="sc-step-body">We design and deploy your custom autonomous setup — marketing, website, social, sales, and more — built to your business and ready to scale.</p>
+        </div>
+        <div class="sc-step">
+          <div class="sc-step-num">03</div>
+          <div class="sc-step-title">Your Business Runs Itself</div>
+          <p class="sc-step-body">Your systems run 24/7 while we refine and optimize. You focus on growth; we handle the engine.</p>
+        </div>
+      </div>
+      <div style="margin-top:52px;text-align:center">
+        <a href="tel:+12137554907" class="sc-cta">📞 Start With NOVA</a>
+      </div>
+    </div>
+  </section>
+
   <!-- §4 WHAT WE DO -->
   <section id="services" class="sc-section">
     <div class="sc-card">
@@ -380,6 +459,18 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
         <li>Mobile and web app development</li>
         <li>Full e-commerce build-out and management</li>
       </ul>
+    </div>
+  </section>
+
+  <!-- §4b MEET NOVA -->
+  <section class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Meet NOVA</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">NOVA is your AI strategist, creative director, and operations engine — all in one. She manages your marketing calendar, writes your copy, posts your content, responds to leads, and tracks what's working. She doesn't take days off, doesn't miss deadlines, and gets smarter the longer she works with your business. When you talk to NOVA, you're not getting a chatbot — you're getting a system built to make your business operate like a market leader.</p>
+      <div class="sc-divider"></div>
+      <a href="tel:+12137554907" class="sc-cta">📞 Talk to NOVA Now</a>
+      <p class="sc-note">No pressure. No cost. Just clarity on what's possible for your business.</p>
     </div>
   </section>
 
@@ -413,7 +504,8 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
 </div>
 
 <!-- ══ SCROLL PROGRESS ═════════════════════════════════════ -->
-<div id="scroll-progress"><div id="scroll-fill"></div></div>
+<div id="scroll-left"  class="scroll-bar"><div class="scroll-bar-fill"></div></div>
+<div id="scroll-right" class="scroll-bar"><div class="scroll-bar-fill"></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -488,18 +580,19 @@ function revealGlobe() {
   threeCanvas.classList.add('reveal');
   scrollContent.classList.add('reveal');
   nav.classList.add('reveal');
-  document.getElementById('scroll-progress').classList.add('reveal');
+  document.querySelectorAll('.scroll-bar').forEach(b => b.classList.add('reveal'));
 }
 
 /* ── Scroll progress bar + mouse-cue fade-out ────────────── */
 (function(){
-  const fill    = document.getElementById('scroll-fill');
+  const fills   = document.querySelectorAll('.scroll-bar-fill');
   const mouseCue = document.getElementById('mouse-cue');
   let cueGone = false;
 
   scrollContent.addEventListener('scroll', () => {
     const max = scrollContent.scrollHeight - scrollContent.clientHeight;
-    if (max > 0) fill.style.height = (scrollContent.scrollTop / max * 100) + '%';
+    const pct = max > 0 ? (scrollContent.scrollTop / max * 100) + '%' : '0%';
+    fills.forEach(f => f.style.height = pct);
 
     if (!cueGone && scrollContent.scrollTop > 30) {
       cueGone = true;
