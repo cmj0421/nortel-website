@@ -313,6 +313,66 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   color:rgba(212,175,55,.45);
 }
 
+/* ── Footer ───────────────────────────────────────────────── */
+#site-footer{
+  width:100%;
+  background:rgba(4,3,0,0.96);
+  border-top:1px solid rgba(212,175,55,.1);
+  padding:72px 48px 0;
+  box-sizing:border-box;
+}
+.footer-top{
+  display:flex;flex-wrap:wrap;gap:48px;
+  justify-content:space-between;align-items:flex-start;
+  max-width:960px;margin:0 auto;padding-bottom:56px;
+}
+.footer-brand{display:flex;flex-direction:column;gap:14px;max-width:320px}
+.footer-logo-row{display:flex;align-items:center;gap:12px}
+.footer-logo{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(212,175,55,.35))}
+.footer-name{
+  font-size:14px;font-weight:700;letter-spacing:.04em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.footer-tagline{font-size:.85rem;line-height:1.65;color:rgba(212,175,55,.45);letter-spacing:.03em}
+.footer-contact{display:flex;flex-direction:column;gap:10px}
+.footer-contact a{
+  font-size:.85rem;letter-spacing:.03em;text-decoration:none;
+  color:rgba(212,175,55,.6);transition:color .2s;
+}
+.footer-contact a:hover{color:rgba(212,175,55,1)}
+.footer-location{font-size:.8rem;letter-spacing:.1em;color:rgba(212,175,55,.3);margin-top:4px}
+.footer-nav{display:flex;flex-direction:column;gap:14px}
+.footer-nav-link{
+  font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;
+  text-decoration:none;color:rgba(212,175,55,.5);
+  transition:color .2s;cursor:pointer;
+}
+.footer-nav-link:hover{color:rgba(212,175,55,1)}
+.footer-cta-col{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.footer-cta{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:14px 38px;border-radius:3px;text-decoration:none;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  font-size:13px;font-weight:700;letter-spacing:.07em;color:#1a0e00;
+  box-shadow:0 2px 14px rgba(212,175,55,.2);
+  transition:transform .18s,box-shadow .18s;
+}
+.footer-cta:hover{transform:translateY(-1px);box-shadow:0 4px 22px rgba(212,175,55,.38)}
+.footer-bottom{
+  max-width:960px;margin:0 auto;
+  border-top:1px solid rgba(212,175,55,.07);
+  padding:20px 0;
+  display:flex;align-items:center;justify-content:center;
+}
+.footer-copy{font-size:.72rem;letter-spacing:.1em;color:rgba(212,175,55,.22)}
+@media(max-width:680px){
+  #site-footer{padding:52px 24px 0}
+  .footer-top{flex-direction:column;gap:40px}
+  .footer-cta-col{align-items:stretch}
+  .footer-cta{justify-content:center}
+}
+
 /* ── Mission centerpiece ──────────────────────────────────── */
 .sc-body-em{
   font-size:clamp(1.25rem,2.4vw,1.55rem);
@@ -476,7 +536,7 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   </section>
 
   <!-- §4b MEET NOVA -->
-  <section class="sc-section">
+  <section id="meet-nova" class="sc-section">
     <div class="sc-card">
       <h2 class="sc-heading">Meet NOVA</h2>
       <div class="sc-divider"></div>
@@ -509,10 +569,40 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   <section class="sc-section">
     <div class="sc-final-inner">
       <p class="sc-final-label">Ready to grow?</p>
-      <a href="tel:+12137554907" class="sc-cta">📞 Call NOVA</a>
+      <a href="tel:+12137554907" class="sc-cta">📞 Talk to NOVA</a>
       <p class="sc-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
     </div>
   </section>
+
+  <!-- FOOTER -->
+  <footer id="site-footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo-row">
+          <img src="logo.png" alt="Nortel" class="footer-logo">
+          <span class="footer-name">Nortel Network Group, LLC</span>
+        </div>
+        <p class="footer-tagline">AI-powered growth and automation for businesses ready to lead.</p>
+      </div>
+      <div class="footer-contact">
+        <a href="tel:+12137554907">+1 (213) 755-4907</a>
+        <a href="mailto:christopher@nortelnetworkgroup.com">christopher@nortelnetworkgroup.com</a>
+        <span class="footer-location">Los Angeles, California</span>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a class="footer-nav-link" href="#mission">Mission</a>
+        <a class="footer-nav-link" href="#how-it-works">How It Works</a>
+        <a class="footer-nav-link" href="#services">What We Do</a>
+        <a class="footer-nav-link" href="#meet-nova">Meet NOVA</a>
+      </nav>
+      <div class="footer-cta-col">
+        <a href="tel:+12137554907" class="footer-cta">📞 Talk to NOVA</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 Nortel Network Group, LLC. All rights reserved.</span>
+    </div>
+  </footer>
 
 </div>
 
@@ -615,7 +705,7 @@ function revealGlobe() {
 })();
 
 /* ── Nav smooth-scroll (offset 64px for fixed nav height) ── */
-document.querySelectorAll('.nav-link[href^="#"]').forEach(link => {
+document.querySelectorAll('.nav-link[href^="#"], .footer-nav-link[href^="#"]').forEach(link => {
   link.addEventListener('click', e => {
     const id = link.getAttribute('href').slice(1);
     const target = document.getElementById(id);
