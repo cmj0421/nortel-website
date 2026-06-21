@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nortel Network Group, LLC</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Globe — Nortel Network Group</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Georgia',serif}
+canvas{display:block}
 
-/* ── Enter screen — full-screen tap area ──────────────────────── */
+/* ── Enter screen — full-screen tap area ─────────────────── */
 #enter-screen{
   position:fixed;inset:0;z-index:100;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -23,10 +24,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ge
   filter:drop-shadow(0 0 40px rgba(212,175,55,.32)) drop-shadow(0 0 10px rgba(212,175,55,.15));
   animation:floatLogo 3.4s ease-in-out infinite;
 }
-@keyframes floatLogo{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-12px)}
-}
+@keyframes floatLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 
 .enter-tap{
   font-size:12px;letter-spacing:.42em;text-transform:uppercase;
@@ -34,19 +32,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ge
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   animation:tapPulse 2.6s ease-in-out infinite;
 }
-@keyframes tapPulse{
-  0%,100%{opacity:.78}
-  50%{opacity:1}
-}
+@keyframes tapPulse{0%,100%{opacity:.78}50%{opacity:1}}
 
-/* ── Shield / logo rush ───────────────────────────────────────── */
+/* ── Shield / logo rush ──────────────────────────────────── */
 #shield-wrap{
   position:fixed;inset:0;z-index:90;
   display:flex;align-items:center;justify-content:center;
-  pointer-events:none;
-  perspective:900px;
-  opacity:0;visibility:hidden;
-  transition:opacity .25s;
+  pointer-events:none;perspective:900px;
+  opacity:0;visibility:hidden;transition:opacity .25s;
 }
 #shield-wrap.active{opacity:1;visibility:visible}
 
@@ -58,7 +51,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ge
   will-change:transform,filter;
 }
 
-/* ── Screen shake ─────────────────────────────────────────────── */
+/* ── Screen shake ────────────────────────────────────────── */
 body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
 @keyframes screenShake{
   10%,90%{transform:translate(-2px,1px)}
@@ -67,162 +60,577 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   40%,60%{transform:translate(3px,-1px)}
 }
 
-/* ── Gold flash overlay — behind shield so logo stays visible ─── */
+/* ── Flash — z:85, behind shield z:90, logo stays visible ── */
 #flash{
   position:fixed;inset:0;z-index:85;
   background:radial-gradient(ellipse at center,rgba(245,231,160,.6) 0%,rgba(212,175,55,.4) 45%,rgba(184,134,11,.15) 75%,transparent 100%);
-  opacity:0;pointer-events:none;
-  transition:opacity .08s;
+  opacity:0;pointer-events:none;transition:opacity .08s;
 }
 #flash.pop{opacity:1}
 #flash.fade{opacity:0;transition:opacity .6s ease-out}
 
-/* ── Melt canvas — above shield so it covers then drips away ─── */
+/* ── Melt canvas — z:92, above shield, drips away ────────── */
 #melt-canvas{
   position:fixed;inset:0;z-index:92;
-  pointer-events:none;
-  opacity:0;transition:opacity .5s ease-out;
+  pointer-events:none;opacity:0;transition:opacity .5s ease-out;
 }
 #melt-canvas.visible{opacity:1}
 
-/* ── Three.js canvas ──────────────────────────────────────────── */
+/* ── Globe / Three.js canvas — revealed after melt ──────── */
 #three-canvas{
   position:fixed;inset:0;z-index:10;
   opacity:0;transition:opacity 0.4s ease-out;
 }
 #three-canvas.reveal{opacity:1}
 
-/* ── Hero overlay ─────────────────────────────────────────────── */
-#hero-overlay{
-  position:fixed;inset:0;z-index:20;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  pointer-events:none;
-  opacity:0;transition:opacity 0.9s ease-out 0.2s;
+/* ── Scroll content — above globe canvas ─────────────────── */
+#scroll-content{
+  position:fixed;inset:0;z-index:15;
+  overflow-y:scroll;scrollbar-width:none;
+  pointer-events:none;opacity:0;
+  transition:opacity 0.9s ease-out 0.2s;
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
-#hero-overlay.reveal{opacity:1;pointer-events:auto}
+#scroll-content::-webkit-scrollbar{display:none}
+#scroll-content.reveal{opacity:1;pointer-events:auto}
 
-.hero-logo-wrap{margin-bottom:28px;text-align:center}
-.hero-logo-img{
-  width:72px;height:72px;object-fit:contain;
-  filter:drop-shadow(0 0 14px rgba(212,175,55,.55));
+.sc-section{
+  min-height:100vh;width:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:120px 40px;
 }
-.hero-company{
-  font-size:clamp(1.4rem,3.8vw,2.7rem);
-  font-weight:700;letter-spacing:.05em;line-height:1.2;
-  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-  text-align:center;padding:0 24px;
+@media(max-width:680px){.sc-section{padding:80px 20px}}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.sc-hero{background:transparent;position:relative}
+.sc-hero-inner{
+  display:flex;flex-direction:column;
+  align-items:center;text-align:center;
 }
-.hero-tagline{
-  margin-top:12px;font-size:clamp(.78rem,1.4vw,.9rem);
-  letter-spacing:.14em;text-align:center;padding:0 24px;
+.sc-logo{
+  width:92px;height:92px;object-fit:contain;margin-bottom:36px;
+  filter:drop-shadow(0 0 20px rgba(212,175,55,.55));
+}
+.sc-company{
+  font-size:clamp(2.4rem,6vw,4.2rem);
+  font-weight:700;letter-spacing:-0.02em;line-height:1.08;
+  padding:0 16px;
   background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.hero-divider{
-  width:120px;height:1px;margin:28px auto;
+.sc-tagline{
+  margin-top:18px;
+  font-size:clamp(.88rem,1.6vw,1.05rem);
+  letter-spacing:.22em;font-weight:500;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-divider{
+  width:120px;height:1px;margin:44px auto;
   background:linear-gradient(90deg,transparent,rgba(212,175,55,.5),transparent);
 }
-.hero-cta{
-  display:inline-flex;align-items:center;gap:10px;
-  padding:14px 36px;border-radius:4px;border:none;cursor:pointer;
+.sc-cta{
+  display:inline-flex;align-items:center;gap:11px;
+  padding:18px 52px;border-radius:4px;text-decoration:none;
   background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
-  background-size:200% 100%;
-  font-size:15px;font-weight:700;letter-spacing:.08em;color:#1a0e00;
-  text-decoration:none;
-  box-shadow:0 4px 20px rgba(212,175,55,.32),0 1px 0 rgba(245,231,160,.35) inset,0 -1px 0 rgba(100,65,0,.4) inset;
+  font-size:16px;font-weight:700;letter-spacing:.07em;color:#1a0e00;
+  box-shadow:0 4px 28px rgba(212,175,55,.32),0 1px 0 rgba(245,231,160,.35) inset;
+  transition:transform .2s,box-shadow .2s;
+}
+.sc-cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 52px rgba(212,175,55,.5),0 1px 0 rgba(245,231,160,.35) inset;
+}
+.sc-sub{
+  margin-top:22px;font-size:12px;letter-spacing:.2em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+/* ── Content cards ────────────────────────────────────────── */
+.sc-card{
+  max-width:720px;width:100%;
+  background:rgba(10,8,2,0.82);
+  border:1px solid rgba(212,175,55,.12);border-radius:6px;
+  padding:88px 80px;text-align:center;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+@media(max-width:680px){.sc-card{padding:56px 28px}}
+
+.sc-heading{
+  font-size:clamp(2.2rem,4.8vw,3.6rem);
+  font-weight:700;letter-spacing:-0.02em;line-height:1.08;
+  margin-bottom:0;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-body{
+  font-size:clamp(1.05rem,1.8vw,1.15rem);
+  line-height:1.85;font-weight:400;
+  color:#EDE6D6;opacity:.88;
+}
+.sc-list{
+  list-style:none;margin-top:4px;
+  display:flex;flex-direction:column;gap:18px;text-align:left;
+}
+.sc-list li{
+  font-size:clamp(1.05rem,1.8vw,1.15rem);
+  line-height:1.85;font-weight:400;
+  color:#EDE6D6;opacity:.88;
+  padding-left:26px;position:relative;
+}
+.sc-list li::before{content:'—';position:absolute;left:0;color:rgba(212,175,55,.5)}
+
+/* ── Final CTA ────────────────────────────────────────────── */
+.sc-final-inner{
+  display:flex;flex-direction:column;
+  align-items:center;text-align:center;gap:32px;
+}
+.sc-final-label{
+  font-size:clamp(2.2rem,4.8vw,3.6rem);
+  font-weight:700;letter-spacing:-0.02em;line-height:1.08;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+/* ── Fixed nav bar ────────────────────────────────────────── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;
+  background:rgba(6,4,1,0.76);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(212,175,55,.07);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.7s ease-out 0.6s;
+}
+#nav.reveal{opacity:1;pointer-events:auto}
+@media(max-width:680px){#nav{padding:0 20px}}
+
+.nav-brand{display:flex;align-items:center;gap:11px;text-decoration:none}
+.nav-logo{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(212,175,55,.35))}
+.nav-name{
+  font-size:13px;font-weight:600;letter-spacing:.05em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.nav-links{display:flex;align-items:center;gap:36px}
+.nav-link{
+  font-size:13px;font-weight:500;letter-spacing:.05em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  opacity:.7;transition:opacity .2s;cursor:pointer;text-decoration:none;
+}
+.nav-link:hover{opacity:1}
+.nav-cta-btn{
+  display:inline-flex;align-items:center;
+  padding:8px 24px;border-radius:3px;text-decoration:none;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  font-size:12px;font-weight:700;letter-spacing:.07em;color:#1a0e00;
+  box-shadow:0 2px 10px rgba(212,175,55,.22);
   transition:transform .18s,box-shadow .18s;
 }
-.hero-cta:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 40px rgba(212,175,55,.5),0 4px 16px rgba(212,175,55,.3),0 1px 0 rgba(245,231,160,.35) inset;
+.nav-cta-btn:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(212,175,55,.4)}
+@media(max-width:680px){.nav-link{display:none}}
+
+/* ── Mouse scroll cue — bottom of hero ───────────────────── */
+.sc-mouse-cue{
+  position:absolute;bottom:48px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  pointer-events:none;z-index:25;
+  opacity:1;transition:opacity 0.7s ease-out;
 }
-.hero-sub{
-  margin-top:18px;font-size:11px;letter-spacing:.18em;text-align:center;
+/* Dark radial halo so cue reads against any globe colour */
+.sc-mouse-cue::before{
+  content:'';
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:110px;height:90px;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,0.55) 0%,transparent 72%);
+  pointer-events:none;z-index:-1;
+}
+.sc-mouse-cue.hidden{opacity:0}
+.sc-mouse-icon{
+  width:26px;height:42px;
+  border:2px solid rgba(212,175,55,0.95);
+  border-radius:13px;
+  display:flex;justify-content:center;
+  padding-top:7px;
+  box-shadow:0 0 10px rgba(212,175,55,0.25), inset 0 0 6px rgba(212,175,55,0.06);
+}
+.sc-mouse-wheel{
+  width:4px;height:8px;
+  background:#D4AF37;
+  border-radius:2px;
+  animation:wheelScroll 1.9s ease-in-out infinite;
+}
+@keyframes wheelScroll{
+  0%,100%{transform:translateY(0);opacity:1}
+  55%    {transform:translateY(8px);opacity:.2}
+}
+.sc-mouse-label{
+  font-size:10px;letter-spacing:.34em;text-transform:uppercase;
   background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.hero-enter-site{
-  margin-top:32px;
-  font-size:11px;letter-spacing:.2em;text-transform:uppercase;
-  text-decoration:none;
+
+/* ── Vertical scroll progress bars — left & right ────────── */
+.scroll-bar{
+  position:fixed;top:0;z-index:48;
+  width:3px;height:100vh;
+  background:rgba(212,175,55,.07);
+  opacity:0;transition:opacity 0.5s ease-out;
+}
+.scroll-bar.reveal{opacity:1}
+#scroll-left {left:32px}
+#scroll-right{right:32px}
+.scroll-bar-fill{
+  width:100%;height:0%;
+  background:linear-gradient(to bottom,#9A7008,#D4AF37,#F5E7A0,#D4AF37,#9A7008);
+}
+@media(max-width:680px){.scroll-bar{display:none}}
+
+/* ── Hero headline upgrade ────────────────────────────────── */
+.sc-headline{
+  margin-top:14px;
+  font-size:clamp(2rem,5vw,3.2rem);
+  font-weight:700;letter-spacing:-0.025em;line-height:1.1;
   background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  border-bottom:1px solid rgba(212,175,55,.45);
-  transition:filter .2s,border-color .2s;
 }
-.hero-enter-site:hover{filter:brightness(1.25);border-color:rgba(212,175,55,.8)}
+.sc-subline{
+  margin-top:16px;
+  font-size:clamp(.9rem,1.7vw,1.1rem);line-height:1.9;
+  color:#EDE6D6;max-width:560px;opacity:.88;
+}
+/* Meet NOVA note */
+.sc-note{
+  margin-top:20px;
+  font-size:.8rem;letter-spacing:.12em;
+  color:rgba(212,175,55,.45);
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+#site-footer{
+  width:100%;
+  background:rgba(4,3,0,0.96);
+  border-top:1px solid rgba(212,175,55,.1);
+  padding:72px 48px 0;
+  box-sizing:border-box;
+}
+.footer-top{
+  display:flex;flex-wrap:wrap;gap:48px;
+  justify-content:space-between;align-items:flex-start;
+  max-width:960px;margin:0 auto;padding-bottom:56px;
+}
+.footer-brand{display:flex;flex-direction:column;gap:14px;max-width:320px}
+.footer-logo-row{display:flex;align-items:center;gap:12px}
+.footer-logo{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(212,175,55,.35))}
+.footer-name{
+  font-size:14px;font-weight:700;letter-spacing:.04em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.footer-tagline{font-size:.85rem;line-height:1.65;color:rgba(212,175,55,.45);letter-spacing:.03em}
+.footer-contact{display:flex;flex-direction:column;gap:10px}
+.footer-contact a{
+  font-size:.85rem;letter-spacing:.03em;text-decoration:none;
+  color:rgba(212,175,55,.6);transition:color .2s;
+}
+.footer-contact a:hover{color:rgba(212,175,55,1)}
+.footer-location{font-size:.8rem;letter-spacing:.1em;color:rgba(212,175,55,.3);margin-top:4px}
+.footer-nav{display:flex;flex-direction:column;gap:14px}
+.footer-nav-link{
+  font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;
+  text-decoration:none;color:rgba(212,175,55,.5);
+  transition:color .2s;cursor:pointer;
+}
+.footer-nav-link:hover{color:rgba(212,175,55,1)}
+.footer-cta-col{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.footer-cta{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:14px 38px;border-radius:3px;text-decoration:none;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  font-size:13px;font-weight:700;letter-spacing:.07em;color:#1a0e00;
+  box-shadow:0 2px 14px rgba(212,175,55,.2);
+  transition:transform .18s,box-shadow .18s;
+}
+.footer-cta:hover{transform:translateY(-1px);box-shadow:0 4px 22px rgba(212,175,55,.38)}
+.footer-bottom{
+  max-width:960px;margin:0 auto;
+  border-top:1px solid rgba(212,175,55,.07);
+  padding:20px 0;
+  display:flex;align-items:center;justify-content:center;
+}
+.footer-copy{font-size:.72rem;letter-spacing:.1em;color:rgba(212,175,55,.22)}
+@media(max-width:680px){
+  #site-footer{padding:52px 24px 0}
+  .footer-top{flex-direction:column;gap:40px}
+  .footer-cta-col{align-items:stretch}
+  .footer-cta{justify-content:center}
+}
+
+/* ── Mission centerpiece ──────────────────────────────────── */
+.sc-body-em{
+  font-size:clamp(1.25rem,2.4vw,1.55rem);
+  font-weight:700;line-height:1.45;letter-spacing:-.01em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin:32px 0;
+}
+.sc-body+.sc-body,.sc-body+.sc-body-em,.sc-body-em+.sc-body{margin-top:28px}
+
+/* ── How It Works steps ───────────────────────────────────── */
+.sc-steps{
+  display:flex;flex-direction:row;gap:40px;
+  margin-top:12px;text-align:left;
+}
+.sc-step{
+  flex:1;display:flex;flex-direction:column;gap:10px;
+  padding:32px 28px;
+  border:1px solid rgba(212,175,55,.1);border-radius:4px;
+  background:rgba(212,175,55,.03);
+}
+.sc-step-num{
+  font-size:.72rem;font-weight:700;letter-spacing:.3em;
+  color:rgba(212,175,55,.4);
+}
+.sc-step-title{
+  font-size:1.05rem;font-weight:700;letter-spacing:-.01em;line-height:1.25;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-step-body{
+  font-size:.95rem;line-height:1.85;color:#EDE6D6;opacity:.88;
+}
+@media(max-width:720px){
+  .sc-steps{flex-direction:column;gap:20px}
+  .sc-step{padding:24px 20px}
+}
 </style>
 </head>
 <body>
 
-<!-- ══ ENTER SCREEN — full screen is tappable ════════════════════ -->
+<!-- ══ ENTER SCREEN ════════════════════════════════════════ -->
 <div id="enter-screen">
   <img src="logo.png" alt="Nortel Network Group" class="enter-logo">
   <p class="enter-tap">Tap to enter</p>
 </div>
 
-<!-- ══ SHIELD RUSH ═══════════════════════════════════════════════ -->
+<!-- ══ SHIELD RUSH ════════════════════════════════════════ -->
 <div id="shield-wrap">
   <img id="shield-img" src="logo.png" alt="">
 </div>
 
-<!-- ══ GOLD FLASH ════════════════════════════════════════════════ -->
+<!-- ══ GOLD FLASH ══════════════════════════════════════════ -->
 <div id="flash"></div>
 
-<!-- ══ MELT CANVAS ═══════════════════════════════════════════════ -->
+<!-- ══ MELT CANVAS ════════════════════════════════════════ -->
 <canvas id="melt-canvas"></canvas>
 
-<!-- ══ THREE.JS CANVAS ═══════════════════════════════════════════ -->
+<!-- ══ GLOBE CANVAS ═══════════════════════════════════════ -->
 <canvas id="three-canvas"></canvas>
 
-<!-- ══ HERO OVERLAY ══════════════════════════════════════════════ -->
-<div id="hero-overlay">
-  <div class="hero-logo-wrap">
-    <img src="logo.png" class="hero-logo-img" alt="Nortel Network Group">
-  </div>
-  <div class="hero-company">Nortel Network Group, LLC</div>
-  <div class="hero-tagline">Intelligence. Engineered for Growth.</div>
-  <div class="hero-divider"></div>
-  <a href="tel:+12137554907" class="hero-cta">
-    <span>📞</span><span>Call NOVA</span>
+<!-- ══ NAV BAR ══════════════════════════════════════════════ -->
+<nav id="nav" role="navigation" aria-label="Main navigation">
+  <a href="#" class="nav-brand">
+    <img src="logo.png" alt="Nortel" class="nav-logo">
+    <span class="nav-name">Nortel Network Group</span>
   </a>
-  <p class="hero-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
-  <a href="index.html" class="hero-enter-site">Enter Site →</a>
-
-  <!-- ═══════════════════════════════════════════════════════════════
-       PHASE 2: NOVA ROBOT ANIMATION VIDEO
-       Uncomment and configure the video element below to add the
-       NOVA AI robot animation in a future update.
-       Recommended: looping WebM/MP4, transparent background preferred.
-       Position this inside the hero overlay or as a separate fixed layer.
-       ═══════════════════════════════════════════════════════════════ -->
-  <!--
-  <div id="nova-video-container" style="position:fixed;bottom:40px;right:40px;z-index:30;width:220px;pointer-events:none">
-    <video id="nova-video" autoplay loop muted playsinline style="width:100%">
-      <source src="nova-robot.webm" type="video/webm">
-      <source src="nova-robot.mp4"  type="video/mp4">
-    </video>
+  <div class="nav-links">
+    <a href="#mission"     class="nav-link">Mission</a>
+    <a href="#services"    class="nav-link">What We Do</a>
+    <a href="#partnership" class="nav-link">Partnership</a>
+    <a href="tel:+12137554907" class="nav-cta-btn">Talk to NOVA</a>
   </div>
-  -->
+</nav>
+
+<!-- ══ SCROLL CONTENT ══════════════════════════════════════ -->
+<div id="scroll-content">
+
+  <!-- §1 HERO — transparent, globe visible behind -->
+  <section class="sc-section sc-hero">
+    <div class="sc-hero-inner">
+      <img src="logo.png" alt="Nortel Network Group" class="sc-logo">
+      <div class="sc-company">Nortel Network Group, LLC</div>
+      <div class="sc-headline">We Make Businesses Autonomous.</div>
+      <div class="sc-subline">A full-service marketing and automation company — we run your marketing, websites, social, apps, and sales so your business operates like a market leader, around the clock.</div>
+      <div class="sc-divider"></div>
+      <a href="tel:+12137554907" class="sc-cta">📞 Talk to NOVA</a>
+      <p class="sc-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
+    </div>
+    <div class="sc-mouse-cue" id="mouse-cue">
+      <div class="sc-mouse-icon">
+        <div class="sc-mouse-wheel"></div>
+      </div>
+      <span class="sc-mouse-label">Scroll</span>
+    </div>
+  </section>
+
+  <!-- §2 OUR MISSION -->
+  <section id="mission" class="sc-section">
+    <div class="sc-card" style="max-width:820px;text-align:left">
+      <h2 class="sc-heading" style="text-align:center">Our Mission</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">Black Americans hold over a trillion dollars in spending power — and a growing desire to invest it in their own communities. But too often, the businesses they want to support aren't yet equipped to compete: the customer service, the scheduling, the inventory, the systems. Not because the vision isn't there — because the infrastructure isn't.</p>
+      <p class="sc-body-em">Nortel exists to close that gap.</p>
+      <p class="sc-body">We build Black-owned businesses up to industry standard and beyond — and we bring that same world-class technology, automation, and operational power to underserved and established businesses across every industry. Whoever we serve, the standard is the same: systems that rival the most advanced companies in any market.</p>
+      <p class="sc-body" style="margin-top:28px">This is how communities build lasting wealth — by owning it, running it, and circulating it among their own, the way every thriving community always has. We're here to make that not just possible, but undeniable.</p>
+    </div>
+  </section>
+
+  <!-- §3 FULLY AUTONOMOUS -->
+  <section class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Fully Autonomous. Always Running.</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">Our AI never sleeps. While you focus on your vision, our systems handle operations around the clock — for Nortel and for every business we partner with. No slowdowns. No gaps. Just consistent, intelligent execution driving growth 24/7.</p>
+    </div>
+  </section>
+
+  <!-- §HOW IT WORKS -->
+  <section id="how-it-works" class="sc-section">
+    <div class="sc-card" style="max-width:900px">
+      <h2 class="sc-heading">How It Works</h2>
+      <div class="sc-divider"></div>
+      <div class="sc-steps">
+        <div class="sc-step">
+          <div class="sc-step-num">01</div>
+          <div class="sc-step-title">Talk to NOVA</div>
+          <p class="sc-step-body">Tell NOVA about your business. She listens, asks the right questions, and understands exactly where you're losing time and customers.</p>
+        </div>
+        <div class="sc-step">
+          <div class="sc-step-num">02</div>
+          <div class="sc-step-title">We Build Your System</div>
+          <p class="sc-step-body">We design and deploy your custom autonomous setup — marketing, website, social, sales, and more — built to your business and ready to scale.</p>
+        </div>
+        <div class="sc-step">
+          <div class="sc-step-num">03</div>
+          <div class="sc-step-title">Your Business Runs Itself</div>
+          <p class="sc-step-body">Your systems run 24/7 while we refine and optimize. You focus on growth; we handle the engine.</p>
+        </div>
+      </div>
+      <div style="margin-top:52px;text-align:center">
+        <a href="tel:+12137554907" class="sc-cta">📞 Start With NOVA</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- §4 WHAT WE DO -->
+  <section id="services" class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">What We Do</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body" style="text-align:center;margin-bottom:36px">A full-service marketing and automation company — everything your business needs to grow, under one roof.</p>
+      <ul class="sc-list">
+        <li>Autonomous marketing that runs around the clock — campaigns, copy, and creative on autopilot</li>
+        <li>Website design, build, and rebuild — from ground up to full overhaul</li>
+        <li>Social media management and content — consistent presence across every platform</li>
+        <li>TikTok Shop and e-commerce setup — built to convert and ready to scale</li>
+        <li>Custom mobile app development — iOS and Android apps that put your business in your customers' hands</li>
+        <li>Branding and creative — identity, visuals, and voice that command attention</li>
+        <li>SEO and online visibility — so the right customers find you first</li>
+        <li>Lead generation and sales automation — turning interest into revenue, automatically</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- §4b MEET NOVA -->
+  <section id="meet-nova" class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Meet NOVA</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">NOVA is your AI strategist, creative director, and operations engine — all in one. She manages your marketing calendar, writes your copy, posts your content, responds to leads, and tracks what's working. She doesn't take days off, doesn't miss deadlines, and gets smarter the longer she works with your business. When you talk to NOVA, you're not getting a chatbot — you're getting a system built to make your business operate like a market leader.</p>
+      <div class="sc-divider"></div>
+      <a href="tel:+12137554907" class="sc-cta">📞 Talk to NOVA Now</a>
+      <p class="sc-note">No pressure. No cost. Just clarity on what's possible for your business.</p>
+    </div>
+  </section>
+
+  <!-- §5 BUILT TO HANDLE VOLUME -->
+  <section class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Built to Handle Volume</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">We don't just help businesses get started — we bring them up to industry standard so they can absorb real demand. Every system we build is designed to scale. When your business grows, our infrastructure grows with it.</p>
+    </div>
+  </section>
+
+  <!-- §6 LONG-TERM PARTNERSHIP -->
+  <section id="partnership" class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Long-Term Partnership</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">We don't do one-off projects. We build lasting relationships with the businesses we serve — staying invested in their growth, refining what we build, and showing up for the long haul. When you work with Nortel, we're in it with you.</p>
+    </div>
+  </section>
+
+  <!-- §7 FINAL CTA -->
+  <section class="sc-section">
+    <div class="sc-final-inner">
+      <p class="sc-final-label">Ready to grow?</p>
+      <a href="tel:+12137554907" class="sc-cta">📞 Talk to NOVA</a>
+      <p class="sc-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="site-footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo-row">
+          <img src="logo.png" alt="Nortel" class="footer-logo">
+          <span class="footer-name">Nortel Network Group, LLC</span>
+        </div>
+        <p class="footer-tagline">AI-powered growth and automation for businesses ready to lead.</p>
+      </div>
+      <div class="footer-contact">
+        <a href="tel:+12137554907">+1 (213) 755-4907</a>
+        <a href="mailto:christopher@nortelnetworkgroup.com">christopher@nortelnetworkgroup.com</a>
+        <span class="footer-location">Los Angeles, California</span>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a class="footer-nav-link" href="#mission">Mission</a>
+        <a class="footer-nav-link" href="#how-it-works">How It Works</a>
+        <a class="footer-nav-link" href="#services">What We Do</a>
+        <a class="footer-nav-link" href="#meet-nova">Meet NOVA</a>
+      </nav>
+      <div class="footer-cta-col">
+        <a href="tel:+12137554907" class="footer-cta">📞 Talk to NOVA</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 Nortel Network Group, LLC. All rights reserved.</span>
+    </div>
+  </footer>
+
 </div>
 
-<!-- ══ THREE.JS ══════════════════════════════════════════════════ -->
+<!-- ══ SCROLL PROGRESS ═════════════════════════════════════ -->
+<div id="scroll-left"  class="scroll-bar"><div class="scroll-bar-fill"></div></div>
+<div id="scroll-right" class="scroll-bar"><div class="scroll-bar-fill"></div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-/* ── Constants & state ──────────────────────────────────────────── */
-const isMobile     = window.innerWidth < 768;
-
+/* ── Shared constants ─────────────────────────────────────── */
+const isMobile    = window.innerWidth < 768;
 const enterScreen = document.getElementById('enter-screen');
 const shieldWrap  = document.getElementById('shield-wrap');
 const shieldImg   = document.getElementById('shield-img');
 const flash       = document.getElementById('flash');
-const meltCanvas  = document.getElementById('melt-canvas');
-const threeCanvas = document.getElementById('three-canvas');
-const heroOverlay = document.getElementById('hero-overlay');
+const meltCanvas    = document.getElementById('melt-canvas');
+const threeCanvas   = document.getElementById('three-canvas');
+const scrollContent = document.getElementById('scroll-content');
+const nav           = document.getElementById('nav');
 
-/* ── Web Audio — chime + whoosh + thud ─────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   INTRO SEQUENCE
+══════════════════════════════════════════════════════════ */
+
+/* ── Web Audio: chimes + whoosh + thud ───────────────────── */
 function makeAudioCtx() {
   try { return new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
 }
@@ -231,7 +639,6 @@ function playIntroSound(ctx) {
   if (!ctx) return;
   const now = ctx.currentTime;
 
-  /* Chime: stacked sine tones in D-major pentatonic */
   [293.66, 369.99, 440.00, 587.33, 739.99].forEach((freq, i) => {
     const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -241,18 +648,17 @@ function playIntroSound(ctx) {
     gain.gain.linearRampToValueAtTime(0.18, now + i * 0.07 + 0.04);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.07 + 1.4);
     osc.start(now + i * 0.07);
-    osc.stop(now + i * 0.07 + 1.5);
+    osc.stop(now  + i * 0.07 + 1.5);
   });
 
-  /* Whoosh: filtered noise sweep */
   const bufLen = ctx.sampleRate * 3.5;
   const buf    = ctx.createBuffer(1, bufLen, ctx.sampleRate);
   const data   = buf.getChannelData(0);
   for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
-  const src    = ctx.createBufferSource();
-  src.buffer   = buf;
-  const bpf    = ctx.createBiquadFilter();
-  bpf.type = 'bandpass';
+  const src = ctx.createBufferSource();
+  src.buffer  = buf;
+  const bpf   = ctx.createBiquadFilter();
+  bpf.type    = 'bandpass';
   bpf.frequency.setValueAtTime(200, now + 0.3);
   bpf.frequency.exponentialRampToValueAtTime(3200, now + 2.8);
   bpf.Q.value = 1.5;
@@ -263,7 +669,6 @@ function playIntroSound(ctx) {
   src.connect(bpf); bpf.connect(gW); gW.connect(ctx.destination);
   src.start(now + 0.3);
 
-  /* Impact thud */
   const tBuf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
   const td   = tBuf.getChannelData(0);
   for (let i = 0; i < tBuf.length; i++) td[i] = (Math.random()*2-1) * Math.exp(-i/(ctx.sampleRate*0.07));
@@ -276,26 +681,56 @@ function playIntroSound(ctx) {
   tSrc.start(now + 2.88);
 }
 
-/* ── Reveal hero scene ──────────────────────────────────────────── */
-function revealHero() {
+/* ── Reveal: globe canvas + scroll content + nav + progress ─ */
+function revealGlobe() {
   threeCanvas.classList.add('reveal');
-  heroOverlay.classList.add('reveal');
+  scrollContent.classList.add('reveal');
+  nav.classList.add('reveal');
+  document.querySelectorAll('.scroll-bar').forEach(b => b.classList.add('reveal'));
 }
 
-/* ── Melt dissolve — solid black canvas drips away to reveal hero ─ */
+/* ── Scroll progress bar + mouse-cue fade-out ────────────── */
+(function(){
+  const fills   = document.querySelectorAll('.scroll-bar-fill');
+  const mouseCue = document.getElementById('mouse-cue');
+  let cueGone = false;
+
+  scrollContent.addEventListener('scroll', () => {
+    const max = scrollContent.scrollHeight - scrollContent.clientHeight;
+    const pct = max > 0 ? (scrollContent.scrollTop / max * 100) + '%' : '0%';
+    fills.forEach(f => f.style.height = pct);
+
+    if (!cueGone && scrollContent.scrollTop > 30) {
+      cueGone = true;
+      mouseCue.classList.add('hidden');
+    }
+  });
+})();
+
+/* ── Nav smooth-scroll (offset 64px for fixed nav height) ── */
+document.querySelectorAll('.nav-link[href^="#"], .footer-nav-link[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const id = link.getAttribute('href').slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    const top = target.getBoundingClientRect().top + scrollContent.scrollTop - 64;
+    scrollContent.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+
+/* ── Melt dissolve — columns drip down, globe shows through ─ */
 function runMeltDissolve() {
   const mc  = meltCanvas;
   const ctx = mc.getContext('2d');
   mc.width  = window.innerWidth;
   mc.height = window.innerHeight;
 
-  /* Black cover — as columns drip away, the hero scene shows through */
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, mc.width, mc.height);
   mc.classList.add('visible');
 
-  /* Start hero reveal immediately — fades in as drips expose it */
-  revealHero();
+  revealGlobe(); // globe fades in concurrently as drips fall
 
   const COLS   = isMobile ? 80 : 160;
   const colW   = Math.ceil(mc.width / COLS);
@@ -311,58 +746,51 @@ function runMeltDissolve() {
       ctx.clearRect(c * colW, 0, colW, drops[c]);
       if (drops[c] >= mc.height) { done[c] = 1; finished++; }
     }
-    if (finished < COLS) { requestAnimationFrame(step); }
-    else { mc.classList.remove('visible'); } /* CSS transition fades out */
+    if (finished < COLS) requestAnimationFrame(step);
+    else mc.classList.remove('visible');
   }
   requestAnimationFrame(step);
 }
 
-/* ── Shield fly-in — JS driven so spin is visible at every scale ── */
+/* ── Shield fly-in — JS rAF for visible spin at all scales ── */
 function runShieldIntro(audioCtx) {
   playIntroSound(audioCtx);
   enterScreen.classList.add('hidden');
   shieldWrap.classList.add('active');
 
-  const DURATION = 3000;
+  const DURATION  = 3000;
   const startTime = performance.now();
 
   function animFrame(now) {
     const t = Math.min((now - startTime) / DURATION, 1);
 
-    /* Scale: cubic ease-in (dot → medium centered size, ~40-50% screen height) */
+    // Cubic ease-in scale: tiny dot → medium centered size (~40-50% screen height)
     const scale = 0.02 + Math.pow(t, 3) * 2.98;
 
-    /* Rotation: smooth-step peaks mid-approach when logo is a visible size.
-       6 full rotations (2160°) concentrated in the t=0.25–0.75 window. */
-    const rotEased = t * t * (3 - 2 * t);   /* smooth-step 0→1 */
+    // Smooth-step rotation: 6 full spins concentrated when logo is visible
+    const rotEased = t * t * (3 - 2 * t);
     const rotDeg   = rotEased * 2160;
 
-    /* Glow intensifies as it closes in */
     const glowR = (8  + t * 32).toFixed(1);
     const glowA = (0.3 + t * 0.7).toFixed(2);
+
     shieldImg.style.transform = `scale(${scale.toFixed(4)}) rotateY(${rotDeg.toFixed(1)}deg)`;
     shieldImg.style.filter    = `drop-shadow(0 0 ${glowR}px rgba(212,175,55,${glowA}))`;
 
-    if (t < 1) {
-      requestAnimationFrame(animFrame);
-    } else {
-      onImpact();
-    }
+    if (t < 1) requestAnimationFrame(animFrame);
+    else        onImpact();
   }
-
   requestAnimationFrame(animFrame);
 }
 
-/* ── Impact — subtle flash that stays behind the logo ───────────── */
+/* ── Impact: flash + shake + 0.8s hold + melt ───────────── */
 function onImpact() {
   document.body.classList.add('shake');
   setTimeout(() => document.body.classList.remove('shake'), 420);
 
-  /* Flash is z:85, shield is z:90 — logo remains fully visible */
   flash.classList.add('pop');
   setTimeout(() => { flash.classList.add('fade'); flash.classList.remove('pop'); }, 130);
 
-  /* Hold logo clearly readable for 0.8s, then melt into site */
   setTimeout(() => {
     shieldWrap.style.transition = 'opacity 0.25s';
     shieldWrap.style.opacity    = '0';
@@ -370,183 +798,213 @@ function onImpact() {
   }, 800);
 }
 
-/* ── Entry point ────────────────────────────────────────────────── */
+/* ── Entry point ─────────────────────────────────────────── */
 enterScreen.addEventListener('click', () => {
   const actx = makeAudioCtx();
   const go   = () => runShieldIntro(actx);
-  if (actx && actx.state === 'suspended') { actx.resume().then(go); } else { go(); }
+  if (actx && actx.state === 'suspended') actx.resume().then(go); else go();
 });
 
-/* ════════════════════════════════════════════════════════════════
-   THREE.JS — 3D HERO SCENE
-   Glass orb · Fresnel shader · floor reflection · bg sphere · dust
-════════════════════════════════════════════════════════════════ */
-(function initThree() {
-  const W = window.innerWidth, H = window.innerHeight;
-  const renderer = new THREE.WebGLRenderer({canvas: threeCanvas, antialias: !isMobile, alpha: true});
-  renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(W, H);
-  renderer.setClearColor(0x000000, 1);
+/* ══════════════════════════════════════════════════════════
+   GLOBE — Three.js (uses #three-canvas from outer scope)
+══════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
 
-  const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 100);
-  camera.position.set(0, 1.4, 5.5);
-  camera.lookAt(0, 0.5, 0);
+// threeCanvas and isMobile are in outer scope
+const renderer = new THREE.WebGLRenderer({canvas: threeCanvas, antialias: !isMobile});
+renderer.setPixelRatio(isMobile ? 1 : Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x0a0a0a, 1);
 
-  scene.fog = new THREE.FogExp2(0x000000, 0.055);
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(48, innerWidth/innerHeight, 0.1, 100);
+camera.position.z = 3.2;
 
-  /* Lights */
-  scene.add(new THREE.AmbientLight(0x1a1200, 0.6));
-  const keyLight = new THREE.PointLight(0xD4AF37, 2.8, 18);
-  keyLight.position.set(3, 5, 4);
-  scene.add(keyLight);
-  const fillLight = new THREE.PointLight(0x4422aa, 1.2, 14);
-  fillLight.position.set(-4, 2, -2);
-  scene.add(fillLight);
-  scene.add(Object.assign(new THREE.PointLight(0xF5E7A0, 1.6, 12), {position: new THREE.Vector3(0, 6, -3)}));
+const globe = new THREE.Group();
+scene.add(globe);
 
-  /* Fresnel glass material */
-  function makeGlassMat(hex, opacity, fresnelExp, specStr) {
-    return new THREE.ShaderMaterial({
-      uniforms: {
-        uColor:    { value: new THREE.Color(hex) },
-        uOpacity:  { value: opacity },
-        uFresnel:  { value: fresnelExp },
-        uSpec:     { value: specStr },
-        uCamPos:   { value: camera.position },
-        uLightPos: { value: new THREE.Vector3(3, 5, 4) },
-      },
-      vertexShader:`
-        varying vec3 vWNormal,vWPos;
-        void main(){
-          vec4 wp=modelMatrix*vec4(position,1.0);
-          vWPos=wp.xyz;
-          vWNormal=normalize(mat3(modelMatrix)*normal);
-          gl_Position=projectionMatrix*viewMatrix*wp;
-        }`,
-      fragmentShader:`
-        uniform vec3 uColor,uCamPos,uLightPos;
-        uniform float uOpacity,uFresnel,uSpec;
-        varying vec3 vWNormal,vWPos;
-        void main(){
-          vec3 N=normalize(vWNormal);
-          vec3 V=normalize(uCamPos-vWPos);
-          vec3 L=normalize(uLightPos-vWPos);
-          vec3 H=normalize(L+V);
-          float rim=pow(clamp(1.0-dot(N,V),0.0,1.0),uFresnel);
-          float spec=pow(max(dot(N,H),0.0),90.0)*uSpec;
-          vec3 col=mix(uColor*0.06,uColor*1.35,rim)+vec3(1.0,0.94,0.72)*spec;
-          float alpha=clamp(mix(0.03,0.92,rim*rim)*uOpacity+spec*0.55,0.0,1.0);
-          gl_FragColor=vec4(col,alpha);
-        }`,
-      transparent:true, side:THREE.FrontSide, depthWrite:false,
-    });
+// ── GLOBE PARTICLES (Fibonacci sphere) ──────────────────
+const N   = isMobile ? 2400 : 5800;
+const pos = new Float32Array(N * 3);
+const col = new Float32Array(N * 3);
+const R   = 1.0;
+const PHI = (1 + Math.sqrt(5)) / 2;
+
+for (let i = 0; i < N; i++) {
+  const theta = Math.acos(1 - 2 * (i + .5) / N);
+  const phi   = 2 * Math.PI * i / PHI;
+  pos[i*3]   = R * Math.sin(theta) * Math.cos(phi);
+  pos[i*3+1] = R * Math.cos(theta);
+  pos[i*3+2] = R * Math.sin(theta) * Math.sin(phi);
+
+  const r = Math.random();
+  if (r > .87) {
+    col[i*3]=.961; col[i*3+1]=.906; col[i*3+2]=.627;  // #F5E7A0 bright
+  } else if (r > .50) {
+    col[i*3]=.831; col[i*3+1]=.686; col[i*3+2]=.216;  // #D4AF37 mid
+  } else {
+    col[i*3]=.722; col[i*3+1]=.525; col[i*3+2]=.043;  // #B8860B deep
   }
+}
 
-  /* Glass orb */
-  const segs = isMobile ? 32 : 64;
-  const orb  = new THREE.Mesh(
-    new THREE.SphereGeometry(1.1, segs, segs),
-    makeGlassMat(0xD4AF37, 1.0, 2.8, 1.8)
-  );
-  orb.position.set(0, 0.8, 0);
-  scene.add(orb);
+const ptGeo = new THREE.BufferGeometry();
+ptGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+ptGeo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+const ptMat = new THREE.PointsMaterial({
+  size: isMobile ? .022 : .014,
+  vertexColors: true, transparent: true, opacity: .88,
+  sizeAttenuation: true, depthWrite: false, blending: THREE.AdditiveBlending
+});
+globe.add(new THREE.Points(ptGeo, ptMat));
 
-  /* Inner glow */
-  orb.add(new THREE.Mesh(
-    new THREE.SphereGeometry(0.75, segs, segs),
-    makeGlassMat(0xF5E7A0, 0.55, 4.5, 0.6)
-  ));
-
-  /* Background sphere */
-  scene.add(new THREE.Mesh(
-    new THREE.SphereGeometry(isMobile ? 7 : 9, 24, 24),
-    new THREE.MeshBasicMaterial({color:0x0d0a04, side:THREE.BackSide, transparent:true, opacity:0.92})
-  ));
-
-  /* Decorative ring */
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(isMobile ? 5.5 : 7, 0.008, 4, 120),
-    new THREE.MeshBasicMaterial({color:0x3a2800, transparent:true, opacity:0.45})
-  );
-  ring.rotation.x = Math.PI / 2.4;
-  scene.add(ring);
-
-  /* Floor reflection */
-  const fc = document.createElement('canvas');
-  fc.width = fc.height = 512;
-  const fx = fc.getContext('2d');
-  const fg = fx.createRadialGradient(256,256,0,256,256,256);
-  fg.addColorStop(0,   'rgba(212,175,55,0.22)');
-  fg.addColorStop(0.4, 'rgba(180,140,40,0.10)');
-  fg.addColorStop(1,   'rgba(0,0,0,0)');
-  fx.fillStyle = fg; fx.fillRect(0,0,512,512);
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10,10),
-    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(fc), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending})
-  );
-  floor.rotation.x = -Math.PI/2; floor.position.y = -0.3;
-  scene.add(floor);
-
-  /* Atmospheric halo sprite */
-  const hc = document.createElement('canvas');
-  hc.width = hc.height = 256;
-  const hx = hc.getContext('2d');
-  const hg = hx.createRadialGradient(128,128,0,128,128,128);
-  hg.addColorStop(0,   'rgba(245,231,160,0.35)');
-  hg.addColorStop(0.5, 'rgba(212,175,55,0.12)');
-  hg.addColorStop(1,   'rgba(0,0,0,0)');
-  hx.fillStyle = hg; hx.fillRect(0,0,256,256);
-  const halo = new THREE.Sprite(new THREE.SpriteMaterial({
-    map:new THREE.CanvasTexture(hc), transparent:true,
-    blending:THREE.AdditiveBlending, depthWrite:false,
-  }));
-  halo.scale.set(4.5, 4.5, 1);
-  halo.position.set(0, 0.8, 0);
-  scene.add(halo);
-
-  /* Dust particles — desktop only */
-  if (!isMobile) {
-    const N   = 320;
-    const pos = new Float32Array(N * 3);
-    for (let i = 0; i < N; i++) {
-      pos[i*3]   = (Math.random()-.5)*14;
-      pos[i*3+1] = (Math.random()-.5)*7+1;
-      pos[i*3+2] = (Math.random()-.5)*10;
+// ── ATMOSPHERE — Fresnel rim glow ───────────────────────
+const atmosMat = new THREE.ShaderMaterial({
+  uniforms: { uC: { value: new THREE.Color(0xD4AF37) } },
+  vertexShader: `
+    varying vec3 vN;
+    void main(){
+      vN = normalize(normalMatrix * normal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
-    const ptGeo = new THREE.BufferGeometry();
-    ptGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    scene.add(new THREE.Points(ptGeo, new THREE.PointsMaterial({
-      color:0xD4AF37, size:0.018, transparent:true, opacity:0.45,
-      blending:THREE.AdditiveBlending, depthWrite:false,
-    })));
+  `,
+  fragmentShader: `
+    uniform vec3 uC;
+    varying vec3 vN;
+    void main(){
+      float rim = 1.0 - clamp(abs(dot(vN, vec3(0.0, 0.0, 1.0))), 0.0, 1.0);
+      rim = pow(rim, 2.0);
+      gl_FragColor = vec4(uC, rim * 0.55);
+    }
+  `,
+  transparent: true, depthWrite: false,
+  side: THREE.BackSide, blending: THREE.AdditiveBlending
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.18, 40, 40), atmosMat));
+
+// ── OUTER HALO — canvas gradient Sprite ─────────────────
+const haloCanvas = document.createElement('canvas');
+haloCanvas.width = haloCanvas.height = 256;
+const hCtx = haloCanvas.getContext('2d');
+const hGrad = hCtx.createRadialGradient(128, 128, 0, 128, 128, 128);
+hGrad.addColorStop(0,    'rgba(212,175,55,0.28)');
+hGrad.addColorStop(0.45, 'rgba(212,175,55,0.10)');
+hGrad.addColorStop(0.75, 'rgba(184,134,11,0.04)');
+hGrad.addColorStop(1,    'rgba(0,0,0,0)');
+hCtx.fillStyle = hGrad;
+hCtx.fillRect(0, 0, 256, 256);
+const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: new THREE.CanvasTexture(haloCanvas),
+  transparent: true, opacity: 1,
+  depthWrite: false, blending: THREE.AdditiveBlending
+}));
+halo.scale.set(3.4, 3.4, 1);
+scene.add(halo);
+
+// ── ARCS — curved light connections ─────────────────────
+const MAX_ARCS = isMobile ? 3 : 7;
+const arcs = [];
+
+function randSphPt() {
+  const th = Math.acos(2 * Math.random() - 1);
+  const ph = 2 * Math.PI * Math.random();
+  return new THREE.Vector3(
+    R * Math.sin(th) * Math.cos(ph),
+    R * Math.cos(th),
+    R * Math.sin(th) * Math.sin(ph)
+  );
+}
+
+const dotGeo = new THREE.SphereGeometry(.032, 6, 6);
+
+function spawnArc() {
+  if (arcs.length >= MAX_ARCS) return;
+  const a = randSphPt(), b = randSphPt();
+  if (a.distanceTo(b) < 1.1) return;
+
+  const mid  = a.clone().add(b).multiplyScalar(.5);
+  const ctrl = mid.clone().normalize().multiplyScalar(R + a.distanceTo(b) * .52);
+  const curve   = new THREE.QuadraticBezierCurve3(a, ctrl, b);
+  const lineGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(72));
+  const lineMat = new THREE.LineBasicMaterial({
+    color: 0xF5E7A0, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending
+  });
+  const mA = new THREE.MeshBasicMaterial({
+    color: 0xFFEE88, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending
+  });
+  const mB  = mA.clone();
+  const dA  = new THREE.Mesh(dotGeo, mA);
+  const dB  = new THREE.Mesh(dotGeo, mB);
+  dA.position.copy(a); dB.position.copy(b);
+  const line = new THREE.Line(lineGeo, lineMat);
+  globe.add(line, dA, dB);
+  arcs.push({ line, dA, dB, mA, mB, age: 0, life: 2.8 + Math.random() * 2.0, fi: .55, fo: .85 });
+}
+
+for (let i = 0; i < Math.min(3, MAX_ARCS); i++) setTimeout(spawnArc, i * 800);
+
+// ── INPUT ────────────────────────────────────────────────
+let mx = 0, my = 0, tx = 0, ty = 0;
+window.addEventListener('mousemove', e => {
+  tx = (e.clientX / innerWidth  - .5) * 2;
+  ty = (e.clientY / innerHeight - .5) * 2;
+});
+window.addEventListener('touchmove', e => {
+  tx = (e.touches[0].clientX / innerWidth  - .5) * 2;
+  ty = (e.touches[0].clientY / innerHeight - .5) * 2;
+}, { passive: true });
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// ── ANIMATE ──────────────────────────────────────────────
+let lt = 0, rotY = 0, tiltX = 0, arcT = 0;
+
+function animate(now) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((now - lt) / 1000, .05);
+  lt = now;
+
+  mx += (tx - mx) * .05;
+  my += (ty - my) * .05;
+
+  rotY  += dt * .25;
+  tiltX += (my * .32 - tiltX) * .06;
+  globe.rotation.set(tiltX, rotY, 0);
+
+  arcT += dt;
+  if (arcT > 1.4) { arcT = 0; spawnArc(); }
+
+  for (let i = arcs.length - 1; i >= 0; i--) {
+    const arc = arcs[i];
+    arc.age += dt;
+    let op;
+    if (arc.age < arc.fi)                op = arc.age / arc.fi;
+    else if (arc.age > arc.life - arc.fo) op = (arc.life - arc.age) / arc.fo;
+    else                                  op = 1;
+    op = Math.max(0, op);
+    arc.line.material.opacity = op * .80;
+    arc.mA.opacity = arc.mB.opacity = op;
+    if (arc.age >= arc.life) {
+      globe.remove(arc.line, arc.dA, arc.dB);
+      arc.line.geometry.dispose(); arc.line.material.dispose();
+      arc.mA.dispose(); arc.mB.dispose();
+      arcs.splice(i, 1);
+    }
   }
 
-  /* Resize */
-  window.addEventListener('resize', () => {
-    const w = window.innerWidth, h = window.innerHeight;
-    camera.aspect = w/h; camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  });
+  camera.position.x =  mx * .12;
+  camera.position.y = -my * .12;
+  camera.lookAt(0, 0, 0);
 
-  /* Animate */
-  let t = 0;
-  (function loop() {
-    requestAnimationFrame(loop);
-    t += 0.008;
-    orb.rotation.y = t * 0.28;
-    orb.rotation.z = Math.sin(t * 0.4) * 0.06;
-    orb.position.y = 0.8 + Math.sin(t * 0.7) * 0.08;
-    orb.children[0].rotation.y = -t * 0.5;
-    ring.rotation.z = t * 0.04;
-    keyLight.position.x = Math.sin(t * 0.5) * 4;
-    keyLight.position.z = Math.cos(t * 0.5) * 4;
-    halo.position.y = orb.position.y;
-    camera.position.x = Math.sin(t * 0.12) * 0.35;
-    camera.position.y = 1.4 + Math.sin(t * 0.18) * 0.12;
-    camera.lookAt(0, 0.6, 0);
-    renderer.render(scene, camera);
-  })();
+  renderer.render(scene, camera);
+}
+
+animate(0);
 })();
 </script>
 </body>
