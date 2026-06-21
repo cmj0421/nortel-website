@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Globe — Nortel Network Group</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a}
+canvas{display:block}
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+const isMobile = innerWidth < 768;
+
+// ── RENDERER ──────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({antialias:!isMobile});
+renderer.setPixelRatio(isMobile ? 1 : Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x0a0a0a, 1);
+document.body.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(48, innerWidth/innerHeight, 0.1, 100);
+camera.position.z = 3.2;
+
+const globe = new THREE.Group();
+scene.add(globe);
+
+// ── GLOBE PARTICLES (Fibonacci sphere) ───────────────────────
+const N   = isMobile ? 2400 : 5800;
+const pos = new Float32Array(N * 3);
+const col = new Float32Array(N * 3);
+const R   = 1.0;
+const PHI = (1 + Math.sqrt(5)) / 2;   // golden ratio
+
+for (let i = 0; i < N; i++) {
+  const theta = Math.acos(1 - 2 * (i + .5) / N);
+  const phi   = 2 * Math.PI * i / PHI;
+  pos[i*3]   = R * Math.sin(theta) * Math.cos(phi);
+  pos[i*3+1] = R * Math.cos(theta);
+  pos[i*3+2] = R * Math.sin(theta) * Math.sin(phi);
+
+  // Three-tier gold palette with random selection
+  const r = Math.random();
+  if (r > .87) {
+    col[i*3]=.961; col[i*3+1]=.906; col[i*3+2]=.627;  // #F5E7A0 bright highlight
+  } else if (r > .50) {
+    col[i*3]=.831; col[i*3+1]=.686; col[i*3+2]=.216;  // #D4AF37 mid gold
+  } else {
+    col[i*3]=.722; col[i*3+1]=.525; col[i*3+2]=.043;  // #B8860B deep gold
+  }
+}
+
+const ptGeo = new THREE.BufferGeometry();
+ptGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+ptGeo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+
+const ptMat = new THREE.PointsMaterial({
+  size: isMobile ? .022 : .014,
+  vertexColors: true,
+  transparent: true,
+  opacity: .88,
+  sizeAttenuation: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending
+});
+
+globe.add(new THREE.Points(ptGeo, ptMat));
+
+// ── ATMOSPHERE — Fresnel rim glow (BackSide sphere) ──────────
+const atmosMat = new THREE.ShaderMaterial({
+  uniforms: { uC: { value: new THREE.Color(0xD4AF37) } },
+  vertexShader: `
+    varying vec3 vN;
+    void main(){
+      vN = normalize(normalMatrix * normal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 uC;
+    varying vec3 vN;
+    void main(){
+      float rim = 1.0 - clamp(abs(dot(vN, vec3(0.0, 0.0, 1.0))), 0.0, 1.0);
+      rim = pow(rim, 2.0);
+      gl_FragColor = vec4(uC, rim * 0.55);
+    }
+  `,
+  transparent: true,
+  depthWrite: false,
+  side: THREE.BackSide,
+  blending: THREE.AdditiveBlending
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.18, 40, 40), atmosMat));
+
+// ── OUTER HALO — radial canvas gradient Sprite ───────────────
+const haloCanvas = document.createElement('canvas');
+haloCanvas.width = haloCanvas.height = 256;
+const hCtx = haloCanvas.getContext('2d');
+const hGrad = hCtx.createRadialGradient(128, 128, 0, 128, 128, 128);
+hGrad.addColorStop(0,    'rgba(212,175,55,0.28)');
+hGrad.addColorStop(0.45, 'rgba(212,175,55,0.10)');
+hGrad.addColorStop(0.75, 'rgba(184,134,11,0.04)');
+hGrad.addColorStop(1,    'rgba(0,0,0,0)');
+hCtx.fillStyle = hGrad;
+hCtx.fillRect(0, 0, 256, 256);
+
+const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: new THREE.CanvasTexture(haloCanvas),
+  transparent: true,
+  opacity: 1,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending
+}));
+halo.scale.set(3.4, 3.4, 1);
+scene.add(halo);
+
+// ── ARCS — curved light connections ──────────────────────────
+const MAX_ARCS = isMobile ? 3 : 7;
+const arcs = [];
+
+function randSphPt() {
+  const th = Math.acos(2 * Math.random() - 1);
+  const ph = 2 * Math.PI * Math.random();
+  return new THREE.Vector3(
+    R * Math.sin(th) * Math.cos(ph),
+    R * Math.cos(th),
+    R * Math.sin(th) * Math.sin(ph)
+  );
+}
+
+// Shared geometry for endpoint dots (shared, never disposed)
+const dotGeo = new THREE.SphereGeometry(.032, 6, 6);
+
+function spawnArc() {
+  if (arcs.length >= MAX_ARCS) return;
+
+  const a = randSphPt();
+  const b = randSphPt();
+  if (a.distanceTo(b) < 1.1) return;   // skip if endpoints too close
+
+  // Control point: midpoint pushed outward to create the arc bow
+  const mid  = a.clone().add(b).multiplyScalar(.5);
+  const ctrl = mid.clone().normalize().multiplyScalar(R + a.distanceTo(b) * .52);
+
+  const curve   = new THREE.QuadraticBezierCurve3(a, ctrl, b);
+  const lineGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(72));
+  const lineMat = new THREE.LineBasicMaterial({
+    color: 0xF5E7A0, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending
+  });
+
+  const mA = new THREE.MeshBasicMaterial({
+    color: 0xFFEE88, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending
+  });
+  const mB = mA.clone();
+  const dA = new THREE.Mesh(dotGeo, mA);
+  const dB = new THREE.Mesh(dotGeo, mB);
+  dA.position.copy(a);
+  dB.position.copy(b);
+
+  const line = new THREE.Line(lineGeo, lineMat);
+  globe.add(line, dA, dB);
+
+  arcs.push({
+    line, dA, dB, mA, mB,
+    age: 0,
+    life: 2.8 + Math.random() * 2.0,
+    fi: .55,   // fade-in duration
+    fo: .85    // fade-out duration
+  });
+}
+
+// Stagger initial arcs
+for (let i = 0; i < Math.min(3, MAX_ARCS); i++) setTimeout(spawnArc, i * 800);
+
+// ── MOUSE / TOUCH INPUT ───────────────────────────────────────
+let mx = 0, my = 0, tx = 0, ty = 0;
+
+window.addEventListener('mousemove', e => {
+  tx = (e.clientX / innerWidth  - .5) * 2;
+  ty = (e.clientY / innerHeight - .5) * 2;
+});
+window.addEventListener('touchmove', e => {
+  tx = (e.touches[0].clientX / innerWidth  - .5) * 2;
+  ty = (e.touches[0].clientY / innerHeight - .5) * 2;
+}, { passive: true });
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// ── ANIMATION LOOP ────────────────────────────────────────────
+let lt = 0, rotY = 0, tiltX = 0, arcT = 0;
+
+function animate(now) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((now - lt) / 1000, .05);
+  lt = now;
+
+  // Smooth mouse tracking
+  mx += (tx - mx) * .05;
+  my += (ty - my) * .05;
+
+  // Globe: auto-spin Y + mouse tilt X
+  rotY  += dt * .25;
+  tiltX += (my * .32 - tiltX) * .06;
+  globe.rotation.set(tiltX, rotY, 0);
+
+  // Arcs: spawn & lifecycle
+  arcT += dt;
+  if (arcT > 1.4) { arcT = 0; spawnArc(); }
+
+  for (let i = arcs.length - 1; i >= 0; i--) {
+    const arc = arcs[i];
+    arc.age += dt;
+
+    let op;
+    if (arc.age < arc.fi)               op = arc.age / arc.fi;
+    else if (arc.age > arc.life - arc.fo) op = (arc.life - arc.age) / arc.fo;
+    else                                  op = 1;
+    op = Math.max(0, op);
+
+    arc.line.material.opacity = op * .80;
+    arc.mA.opacity = arc.mB.opacity = op;
+
+    if (arc.age >= arc.life) {
+      globe.remove(arc.line, arc.dA, arc.dB);
+      arc.line.geometry.dispose();
+      arc.line.material.dispose();
+      arc.mA.dispose();
+      arc.mB.dispose();
+      arcs.splice(i, 1);
+    }
+  }
+
+  // Subtle camera parallax (cursor pulls camera, not globe)
+  camera.position.x =  mx * .12;
+  camera.position.y = -my * .12;
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+}
+
+animate(0);
+})();
+</script>
+</body>
+</html>
