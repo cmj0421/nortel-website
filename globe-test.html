@@ -234,7 +234,99 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   transition:transform .18s,box-shadow .18s;
 }
 .nav-cta-btn:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(212,175,55,.4)}
+.nav-portal-btn{
+  display:inline-flex;align-items:center;
+  padding:7px 20px;border-radius:3px;text-decoration:none;cursor:pointer;
+  border:1px solid rgba(212,175,55,.45);background:transparent;
+  font-size:12px;font-weight:600;letter-spacing:.07em;
+  color:rgba(212,175,55,.8);
+  transition:border-color .18s,color .18s,background .18s;
+  font-family:inherit;
+}
+.nav-portal-btn:hover{border-color:rgba(212,175,55,.9);color:#F5E7A0;background:rgba(212,175,55,.06)}
 @media(max-width:680px){.nav-link{display:none}}
+
+/* ── Client Portal Modal ───────────────────────────────────── */
+#portal-backdrop{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;box-sizing:border-box;
+  opacity:0;pointer-events:none;
+  transition:opacity .28s ease-out;
+}
+#portal-backdrop.open{opacity:1;pointer-events:auto}
+#portal-modal{
+  width:100%;max-width:420px;
+  background:#0a0800;
+  border:1px solid rgba(212,175,55,.22);
+  border-radius:14px;
+  box-shadow:0 24px 72px rgba(0,0,0,.85),inset 0 1px 0 rgba(212,175,55,.08);
+  overflow:hidden;
+  transform:scale(.95) translateY(10px);
+  transition:transform .3s cubic-bezier(.22,1,.36,1);
+}
+#portal-backdrop.open #portal-modal{transform:scale(1) translateY(0)}
+.portal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px 16px;
+  border-bottom:1px solid rgba(212,175,55,.1);
+}
+.portal-header-left{display:flex;align-items:center;gap:10px}
+.portal-logo{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 5px rgba(212,175,55,.4))}
+.portal-title{
+  font-size:16px;font-weight:700;letter-spacing:.03em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.portal-close{
+  background:none;border:none;cursor:pointer;font-size:18px;line-height:1;padding:4px;
+  color:rgba(212,175,55,.4);transition:color .15s;
+}
+.portal-close:hover{color:rgba(212,175,55,.9)}
+.portal-body{padding:24px 28px 28px;display:flex;flex-direction:column;gap:20px}
+.portal-teaser{
+  font-size:.84rem;line-height:1.7;color:#EDE6D6;opacity:.8;
+  padding:14px 16px;
+  background:rgba(212,175,55,.04);
+  border:1px solid rgba(212,175,55,.1);
+  border-radius:6px;
+}
+.portal-form{display:flex;flex-direction:column;gap:12px}
+.portal-field{display:flex;flex-direction:column;gap:5px}
+.portal-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;color:rgba(212,175,55,.5)}
+.portal-input{
+  background:rgba(212,175,55,.04);
+  border:1px solid rgba(212,175,55,.18);
+  border-radius:5px;padding:11px 14px;
+  font-size:.9rem;color:#EDE6D6;outline:none;
+  font-family:inherit;
+  transition:border-color .2s,box-shadow .2s;
+}
+.portal-input::placeholder{color:rgba(212,175,55,.22)}
+.portal-input:focus{border-color:rgba(212,175,55,.5);box-shadow:0 0 0 3px rgba(212,175,55,.06)}
+.portal-submit{
+  margin-top:4px;padding:12px;border:none;border-radius:5px;cursor:pointer;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  font-size:13px;font-weight:700;letter-spacing:.08em;color:#1a0e00;
+  font-family:inherit;
+  box-shadow:0 2px 14px rgba(212,175,55,.25);
+  transition:transform .15s,box-shadow .15s;
+}
+.portal-submit:hover{transform:translateY(-1px);box-shadow:0 4px 22px rgba(212,175,55,.4)}
+.portal-alt{font-size:.78rem;text-align:center;color:rgba(212,175,55,.4)}
+.portal-alt a{color:rgba(212,175,55,.75);text-decoration:none;font-weight:600;transition:color .15s}
+.portal-alt a:hover{color:#F5E7A0}
+.portal-note{
+  font-size:.7rem;text-align:center;letter-spacing:.05em;line-height:1.55;
+  color:rgba(212,175,55,.28);padding-top:4px;
+  border-top:1px solid rgba(212,175,55,.07);padding-top:14px;
+}
+@media(max-width:480px){
+  #portal-backdrop{padding:16px}
+  .portal-body{padding:20px 20px 24px}
+}
 
 /* ── Mouse scroll cue — bottom of hero ───────────────────── */
 .sc-mouse-cue{
@@ -640,6 +732,7 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
     <a href="#mission"     class="nav-link">Mission</a>
     <a href="#services"    class="nav-link">What We Do</a>
     <a href="#partnership" class="nav-link">Partnership</a>
+    <button class="nav-portal-btn" id="nav-portal-btn">Client Portal</button>
     <a href="tel:+12137554907" class="nav-cta-btn">Talk to NOVA</a>
   </div>
 </nav>
@@ -653,6 +746,7 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
       <img src="logo.png" alt="Nortel Network Group" class="sc-logo">
       <div class="sc-company">Nortel Network Group, LLC</div>
       <div class="sc-headline">We Make Businesses Autonomous.</div>
+      <div style="width:50px;height:1px;margin:22px auto 22px;background:linear-gradient(90deg,transparent,#D4AF37,transparent);opacity:.8"></div>
       <div class="sc-subline">A full-service marketing and automation company — we run your marketing, websites, social, apps, and sales so your business operates like a market leader, around the clock.</div>
       <div class="sc-divider"></div>
       <a href="tel:+12137554907" class="sc-cta">📞 Talk to NOVA</a>
@@ -793,6 +887,7 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
         <a class="footer-nav-link" href="#how-it-works">How It Works</a>
         <a class="footer-nav-link" href="#services">What We Do</a>
         <a class="footer-nav-link" href="#meet-nova">Meet NOVA</a>
+        <button class="footer-nav-link" id="footer-portal-btn" style="background:none;border:none;cursor:pointer;font-family:inherit;padding:0;text-align:left">Client Portal</button>
       </nav>
       <div class="footer-cta-col">
         <a href="tel:+12137554907" class="footer-cta">📞 Talk to NOVA</a>
@@ -1297,6 +1392,54 @@ animate(0);
   </div>
 
 </div>
+
+<!-- ══ CLIENT PORTAL MODAL ════════════════════════════════ -->
+<div id="portal-backdrop" role="dialog" aria-modal="true" aria-label="Client Portal">
+  <div id="portal-modal">
+    <div class="portal-header">
+      <div class="portal-header-left">
+        <img src="logo.png" alt="Nortel" class="portal-logo">
+        <span class="portal-title">Client Portal</span>
+      </div>
+      <button class="portal-close" id="portal-close" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="portal-body">
+      <p class="portal-teaser">Your dedicated client portal is coming soon. Soon you'll log in to manage your services, request updates, upgrade anytime, and work directly with your own dedicated AI agent — available 24/7.</p>
+      <form class="portal-form" onsubmit="return false">
+        <div class="portal-field">
+          <label class="portal-label" for="portal-email">Email Address</label>
+          <input id="portal-email" class="portal-input" type="email" placeholder="you@yourbusiness.com" autocomplete="email">
+        </div>
+        <div class="portal-field">
+          <label class="portal-label" for="portal-pass">Password</label>
+          <input id="portal-pass" class="portal-input" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button type="submit" class="portal-submit">Log In</button>
+      </form>
+      <p class="portal-alt">Not a client yet? &nbsp;<a href="tel:+12137554907">Talk to NOVA</a></p>
+      <p class="portal-note">Portals launching soon. Existing clients will receive access details directly.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const backdrop = document.getElementById('portal-backdrop');
+  const openBtns = [
+    document.getElementById('nav-portal-btn'),
+    document.getElementById('footer-portal-btn')
+  ];
+  const closeBtn = document.getElementById('portal-close');
+
+  function openPortal(){ backdrop.classList.add('open'); }
+  function closePortal(){ backdrop.classList.remove('open'); }
+
+  openBtns.forEach(btn => btn && btn.addEventListener('click', openPortal));
+  closeBtn.addEventListener('click', closePortal);
+  backdrop.addEventListener('click', e => { if(e.target === backdrop) closePortal(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closePortal(); });
+})();
+</script>
 
 </body>
 </html>
