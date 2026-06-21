@@ -313,6 +313,202 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   color:rgba(212,175,55,.45);
 }
 
+/* ── NOVA Chat Widget ─────────────────────────────────────── */
+/* FAB wrap — holds pill + button so they sit together */
+#nova-fab-wrap{
+  position:fixed;bottom:32px;right:32px;z-index:200;
+  display:flex;align-items:center;gap:10px;
+  opacity:0;pointer-events:none;
+  transition:opacity .6s ease-out;
+}
+#nova-fab-wrap.reveal{opacity:1;pointer-events:auto}
+
+/* pill label */
+#nova-pill{
+  background:rgba(6,4,0,0.88);
+  border:1px solid rgba(212,175,55,.28);
+  border-radius:20px;
+  padding:6px 13px;
+  font-size:.72rem;font-weight:700;letter-spacing:.09em;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  white-space:nowrap;cursor:pointer;
+  background-clip:text;-webkit-background-clip:unset;
+  color:rgba(212,175,55,.9);
+  box-shadow:0 2px 12px rgba(0,0,0,.55);
+  transition:color .18s,border-color .18s;
+}
+#nova-pill:hover{color:#F5E7A0;border-color:rgba(212,175,55,.55)}
+
+/* the circle button */
+#nova-fab{
+  width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;flex-shrink:0;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 40%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  box-shadow:0 4px 24px rgba(212,175,55,.5),0 0 0 0 rgba(212,175,55,.3);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .18s,box-shadow .18s;
+  animation:novaFabPulse 3s ease-in-out infinite;
+}
+#nova-fab:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 8px 36px rgba(212,175,55,.65),0 0 0 7px rgba(212,175,55,.13)}
+@keyframes novaFabPulse{
+  0%,100%{box-shadow:0 4px 24px rgba(212,175,55,.5),0 0 0 0 rgba(212,175,55,.2)}
+  50%    {box-shadow:0 6px 32px rgba(212,175,55,.6),0 0 0 12px rgba(212,175,55,0)}
+}
+.nova-fab-inner{display:flex;flex-direction:column;align-items:center;gap:2px}
+.nova-fab-icon{width:24px;height:24px;fill:#1a0e00}
+.nova-fab-label{font-size:7.5px;font-weight:900;letter-spacing:.14em;color:#1a0e00}
+
+/* one-time tooltip bubble */
+#nova-tooltip{
+  position:fixed;bottom:108px;right:32px;z-index:201;
+  background:rgba(6,4,0,0.92);
+  border:1px solid rgba(212,175,55,.28);
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:.8rem;color:#EDE6D6;line-height:1.45;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 28px rgba(0,0,0,.7);
+  white-space:nowrap;
+  opacity:0;pointer-events:none;
+  transform:translateY(6px);
+  transition:opacity .35s ease-out,transform .35s ease-out;
+}
+#nova-tooltip.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+/* small arrow pointing down-right */
+#nova-tooltip::after{
+  content:'';position:absolute;bottom:-7px;right:42px;
+  width:12px;height:7px;
+  background:rgba(6,4,0,0.92);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  border-bottom:1px solid rgba(212,175,55,.2);
+}
+
+#nova-window{
+  position:fixed;bottom:104px;right:32px;z-index:199;
+  width:360px;height:520px;
+  background:#0a0800;
+  border:1px solid rgba(212,175,55,.22);
+  border-radius:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,.8),0 0 0 1px rgba(212,175,55,.06),inset 0 1px 0 rgba(212,175,55,.08);
+  display:flex;flex-direction:column;overflow:hidden;
+  opacity:0;pointer-events:none;
+  transform:translateY(18px) scale(.97);
+  transform-origin:bottom right;
+  transition:opacity .25s ease-out,transform .28s cubic-bezier(.22,1,.36,1);
+}
+#nova-window.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+
+/* header */
+.nova-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;
+  background:rgba(10,8,0,.95);
+  border-bottom:1px solid rgba(212,175,55,.1);
+  flex-shrink:0;
+}
+.nova-header-logo{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 0 5px rgba(212,175,55,.4))}
+.nova-header-info{flex:1;display:flex;flex-direction:column;gap:2px}
+.nova-header-name{
+  font-size:13px;font-weight:700;letter-spacing:.04em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.nova-header-status{display:flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.06em;color:rgba(212,175,55,.45)}
+.nova-status-dot{width:6px;height:6px;border-radius:50%;background:#4CAF50;box-shadow:0 0 4px rgba(76,175,80,.6);flex-shrink:0}
+.nova-close{
+  background:none;border:none;cursor:pointer;padding:4px;
+  color:rgba(212,175,55,.4);font-size:18px;line-height:1;
+  transition:color .15s;
+}
+.nova-close:hover{color:rgba(212,175,55,.9)}
+
+/* messages */
+.nova-messages{
+  flex:1;overflow-y:auto;padding:20px 14px 12px;
+  display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:rgba(212,175,55,.15) transparent;
+}
+.nova-messages::-webkit-scrollbar{width:3px}
+.nova-messages::-webkit-scrollbar-thumb{background:rgba(212,175,55,.2);border-radius:2px}
+
+.nova-bubble{max-width:82%;padding:11px 14px;border-radius:12px;font-size:.875rem;line-height:1.6}
+.nova-bubble-recv{
+  align-self:flex-start;
+  background:rgba(212,175,55,.06);
+  border:1px solid rgba(212,175,55,.16);
+  border-bottom-left-radius:3px;
+  color:#EDE6D6;
+}
+.nova-bubble-sent{
+  align-self:flex-end;
+  background:linear-gradient(135deg,#B8860B,#D4AF37 60%,#F5E7A0);
+  border-bottom-right-radius:3px;
+  color:#1a0e00;font-weight:600;
+}
+.nova-bubble-time{font-size:.65rem;opacity:.45;margin-top:4px;display:block}
+
+/* suggestion chips */
+.nova-chips{
+  display:flex;flex-wrap:wrap;gap:7px;
+  padding:0 14px 14px;flex-shrink:0;
+}
+.nova-chip{
+  padding:6px 13px;border-radius:20px;
+  border:1px solid rgba(212,175,55,.25);
+  background:rgba(212,175,55,.05);
+  font-size:.75rem;letter-spacing:.03em;color:rgba(212,175,55,.75);
+  cursor:pointer;transition:background .15s,color .15s,border-color .15s;
+}
+.nova-chip:hover{background:rgba(212,175,55,.12);color:#D4AF37;border-color:rgba(212,175,55,.5)}
+
+/* input bar */
+.nova-input-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;
+  border-top:1px solid rgba(212,175,55,.1);
+  background:rgba(6,4,0,.95);
+  flex-shrink:0;
+}
+.nova-input{
+  flex:1;background:rgba(212,175,55,.05);
+  border:1px solid rgba(212,175,55,.14);
+  border-radius:22px;padding:9px 14px;
+  font-size:.85rem;color:#EDE6D6;outline:none;
+  font-family:inherit;
+  transition:border-color .2s;
+}
+.nova-input::placeholder{color:rgba(212,175,55,.3)}
+.nova-input:focus{border-color:rgba(212,175,55,.4)}
+.nova-send{
+  width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;flex-shrink:0;
+  background:linear-gradient(135deg,#B8860B,#D4AF37 60%,#F5E7A0);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s,box-shadow .15s;
+}
+.nova-send:hover{transform:scale(1.1);box-shadow:0 2px 10px rgba(212,175,55,.4)}
+.nova-send svg{width:15px;height:15px;fill:#1a0e00}
+
+/* coming soon note */
+.nova-footer-note{
+  padding:8px 14px 10px;text-align:center;
+  font-size:.68rem;letter-spacing:.05em;
+  color:rgba(212,175,55,.28);
+  border-top:1px solid rgba(212,175,55,.06);
+  background:rgba(6,4,0,.95);flex-shrink:0;
+  line-height:1.5;
+}
+.nova-footer-note a{color:rgba(212,175,55,.45);text-decoration:none}
+.nova-footer-note a:hover{color:rgba(212,175,55,.8)}
+
+@media(max-width:540px){
+  #nova-window{
+    left:12px;right:12px;bottom:108px;width:auto;
+    height:calc(100dvh - 124px);border-radius:16px;
+  }
+  #nova-fab-wrap{bottom:24px;right:18px}
+  #nova-pill{display:none}
+  #nova-tooltip{right:18px;bottom:102px}
+}
+
 /* ── Footer ───────────────────────────────────────────────── */
 #site-footer{
   width:100%;
@@ -687,6 +883,8 @@ function revealGlobe() {
   scrollContent.classList.add('reveal');
   nav.classList.add('reveal');
   document.querySelectorAll('.scroll-bar').forEach(b => b.classList.add('reveal'));
+  document.getElementById('nova-fab-wrap').classList.add('reveal');
+  if(window.__novaTipReady) window.__novaTipReady();
 }
 
 /* ── Scroll progress bar + mouse-cue fade-out ────────────── */
@@ -1006,6 +1204,99 @@ function animate(now) {
 
 animate(0);
 })();
+
+/* ── NOVA Chat Widget ─────────────────────────────────────── */
+(function(){
+  const fab      = document.getElementById('nova-fab');
+  const pill     = document.getElementById('nova-pill');
+  const tooltip  = document.getElementById('nova-tooltip');
+  const win      = document.getElementById('nova-window');
+  const closeBtn = document.getElementById('nova-close');
+  const chips    = document.querySelectorAll('.nova-chip');
+
+  function openChat(){ win.classList.add('open'); dismissTooltip(); }
+  function closeChat(){ win.classList.remove('open'); }
+  function dismissTooltip(){ tooltip.classList.remove('show'); }
+
+  fab.addEventListener('click',  () => win.classList.contains('open') ? closeChat() : openChat());
+  pill.addEventListener('click', openChat);
+  closeBtn.addEventListener('click', closeChat);
+  tooltip.addEventListener('click', () => { dismissTooltip(); openChat(); });
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const input = document.getElementById('nova-input');
+      input.value = chip.textContent;
+      input.focus();
+    });
+  });
+
+  /* show tooltip once, 1.8s after reveal, auto-dismiss after 5s */
+  const _origReveal = window._novaRevealTooltip = function(){
+    setTimeout(() => {
+      tooltip.classList.add('show');
+      setTimeout(dismissTooltip, 5000);
+    }, 1800);
+  };
+  /* called from revealGlobe via a small hook below */
+  window.__novaTipReady = _origReveal;
+})();
 </script>
+
+<!-- ══ NOVA TOOLTIP ════════════════════════════════════════ -->
+<div id="nova-tooltip">👋 Have a question? Ask NOVA</div>
+
+<!-- ══ NOVA FLOATING BUTTON ════════════════════════════════ -->
+<div id="nova-fab-wrap">
+  <span id="nova-pill">Chat with NOVA</span>
+  <button id="nova-fab" aria-label="Chat with NOVA">
+    <div class="nova-fab-inner">
+      <svg class="nova-fab-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+      </svg>
+      <span class="nova-fab-label">NOVA</span>
+    </div>
+  </button>
+</div>
+
+<!-- ══ NOVA CHAT WINDOW ════════════════════════════════════ -->
+<div id="nova-window" role="dialog" aria-label="Chat with NOVA">
+
+  <div class="nova-header">
+    <img src="logo.png" alt="Nortel" class="nova-header-logo">
+    <div class="nova-header-info">
+      <span class="nova-header-name">NOVA</span>
+      <span class="nova-header-status"><span class="nova-status-dot"></span>AI Strategist &bull; Online</span>
+    </div>
+    <button class="nova-close" id="nova-close" aria-label="Close chat">&#x2715;</button>
+  </div>
+
+  <div class="nova-messages" id="nova-messages">
+    <div class="nova-bubble nova-bubble-recv">
+      Hi, I'm NOVA — Nortel's AI strategist. I can show you exactly how we'd make your business autonomous: marketing, websites, social, apps, and more. What kind of business do you run?
+      <span class="nova-bubble-time">Just now</span>
+    </div>
+  </div>
+
+  <div class="nova-chips">
+    <button class="nova-chip">What do you do?</button>
+    <button class="nova-chip">How does it work?</button>
+    <button class="nova-chip">I want to grow my business</button>
+  </div>
+
+  <div class="nova-input-bar">
+    <input id="nova-input" class="nova-input" type="text" placeholder="Ask NOVA anything…" autocomplete="off">
+    <button class="nova-send" aria-label="Send">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+  <div class="nova-footer-note">
+    NOVA is getting smarter — full live chat coming soon.<br>
+    For immediate help, call <a href="tel:+12137554907">(213) 755-4907</a>.
+  </div>
+
+</div>
+
 </body>
 </html>
