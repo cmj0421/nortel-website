@@ -6,24 +6,448 @@
 <title>Globe — Nortel Network Group</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Georgia',serif}
 canvas{display:block}
+
+/* ── Enter screen — full-screen tap area ─────────────────── */
+#enter-screen{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#000;cursor:pointer;
+  user-select:none;-webkit-user-select:none;
+}
+#enter-screen.hidden{display:none}
+
+.enter-logo{
+  width:130px;height:130px;object-fit:contain;
+  margin-bottom:44px;
+  filter:drop-shadow(0 0 40px rgba(212,175,55,.32)) drop-shadow(0 0 10px rgba(212,175,55,.15));
+  animation:floatLogo 3.4s ease-in-out infinite;
+}
+@keyframes floatLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+.enter-tap{
+  font-size:12px;letter-spacing:.42em;text-transform:uppercase;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:tapPulse 2.6s ease-in-out infinite;
+}
+@keyframes tapPulse{0%,100%{opacity:.78}50%{opacity:1}}
+
+/* ── Shield / logo rush ──────────────────────────────────── */
+#shield-wrap{
+  position:fixed;inset:0;z-index:90;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;perspective:900px;
+  opacity:0;visibility:hidden;transition:opacity .25s;
+}
+#shield-wrap.active{opacity:1;visibility:visible}
+
+#shield-img{
+  width:140px;height:140px;object-fit:contain;
+  transform:scale(0.02) rotateY(0deg);
+  transform-origin:center center;
+  filter:drop-shadow(0 0 10px rgba(212,175,55,.35));
+  will-change:transform,filter;
+}
+
+/* ── Screen shake ────────────────────────────────────────── */
+body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes screenShake{
+  10%,90%{transform:translate(-2px,1px)}
+  20%,80%{transform:translate(3px,-2px)}
+  30%,50%,70%{transform:translate(-3px,2px)}
+  40%,60%{transform:translate(3px,-1px)}
+}
+
+/* ── Flash — z:85, behind shield z:90, logo stays visible ── */
+#flash{
+  position:fixed;inset:0;z-index:85;
+  background:radial-gradient(ellipse at center,rgba(245,231,160,.6) 0%,rgba(212,175,55,.4) 45%,rgba(184,134,11,.15) 75%,transparent 100%);
+  opacity:0;pointer-events:none;transition:opacity .08s;
+}
+#flash.pop{opacity:1}
+#flash.fade{opacity:0;transition:opacity .6s ease-out}
+
+/* ── Melt canvas — z:92, above shield, drips away ────────── */
+#melt-canvas{
+  position:fixed;inset:0;z-index:92;
+  pointer-events:none;opacity:0;transition:opacity .5s ease-out;
+}
+#melt-canvas.visible{opacity:1}
+
+/* ── Globe / Three.js canvas — revealed after melt ──────── */
+#three-canvas{
+  position:fixed;inset:0;z-index:10;
+  opacity:0;transition:opacity 0.4s ease-out;
+}
+#three-canvas.reveal{opacity:1}
+
+/* ── Scroll content — above globe canvas ─────────────────── */
+#scroll-content{
+  position:fixed;inset:0;z-index:15;
+  overflow-y:scroll;scrollbar-width:none;
+  pointer-events:none;opacity:0;
+  transition:opacity 0.9s ease-out 0.2s;
+}
+#scroll-content::-webkit-scrollbar{display:none}
+#scroll-content.reveal{opacity:1;pointer-events:auto}
+
+.sc-section{
+  min-height:100vh;width:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:60px 24px;
+}
+.sc-hero{background:transparent}
+.sc-hero-inner{
+  display:flex;flex-direction:column;
+  align-items:center;text-align:center;
+}
+.sc-logo{
+  width:72px;height:72px;object-fit:contain;margin-bottom:24px;
+  filter:drop-shadow(0 0 14px rgba(212,175,55,.55));
+}
+.sc-company{
+  font-size:clamp(1.5rem,4vw,2.8rem);font-weight:700;
+  letter-spacing:.04em;line-height:1.2;padding:0 16px;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-tagline{
+  margin-top:12px;font-size:clamp(.8rem,1.5vw,.95rem);letter-spacing:.14em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-divider{
+  width:100px;height:1px;margin:28px auto;
+  background:linear-gradient(90deg,transparent,rgba(212,175,55,.5),transparent);
+}
+.sc-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 38px;border-radius:4px;text-decoration:none;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  font-size:15px;font-weight:700;letter-spacing:.08em;color:#1a0e00;
+  box-shadow:0 4px 20px rgba(212,175,55,.32),0 1px 0 rgba(245,231,160,.35) inset;
+  transition:transform .18s,box-shadow .18s;
+}
+.sc-cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 40px rgba(212,175,55,.5),0 1px 0 rgba(245,231,160,.35) inset;
+}
+.sc-sub{
+  margin-top:16px;font-size:11px;letter-spacing:.18em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-card{
+  max-width:620px;width:100%;
+  background:rgba(10,8,2,0.80);
+  border:1px solid rgba(212,175,55,.13);border-radius:4px;
+  padding:52px 44px;text-align:center;
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+}
+@media(max-width:600px){.sc-card{padding:36px 22px}}
+.sc-heading{
+  font-size:clamp(1.3rem,3vw,2rem);font-weight:700;letter-spacing:.05em;
+  margin-bottom:0;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sc-body{
+  font-size:clamp(.88rem,1.6vw,1rem);line-height:1.85;
+  color:rgba(215,185,95,.88);
+}
+.sc-list{
+  list-style:none;margin-top:4px;
+  display:flex;flex-direction:column;gap:11px;text-align:left;
+}
+.sc-list li{
+  font-size:clamp(.88rem,1.6vw,1rem);
+  color:rgba(215,185,95,.88);
+  padding-left:22px;position:relative;
+}
+.sc-list li::before{content:'—';position:absolute;left:0;color:rgba(212,175,55,.55)}
+.sc-final-inner{
+  display:flex;flex-direction:column;
+  align-items:center;text-align:center;gap:20px;
+}
+.sc-final-label{
+  font-size:clamp(1.1rem,2.5vw,1.6rem);font-weight:700;letter-spacing:.04em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
 </style>
 </head>
 <body>
+
+<!-- ══ ENTER SCREEN ════════════════════════════════════════ -->
+<div id="enter-screen">
+  <img src="logo.png" alt="Nortel Network Group" class="enter-logo">
+  <p class="enter-tap">Tap to enter</p>
+</div>
+
+<!-- ══ SHIELD RUSH ════════════════════════════════════════ -->
+<div id="shield-wrap">
+  <img id="shield-img" src="logo.png" alt="">
+</div>
+
+<!-- ══ GOLD FLASH ══════════════════════════════════════════ -->
+<div id="flash"></div>
+
+<!-- ══ MELT CANVAS ════════════════════════════════════════ -->
+<canvas id="melt-canvas"></canvas>
+
+<!-- ══ GLOBE CANVAS ═══════════════════════════════════════ -->
+<canvas id="three-canvas"></canvas>
+
+<!-- ══ SCROLL CONTENT ══════════════════════════════════════ -->
+<div id="scroll-content">
+
+  <!-- §1 HERO — transparent, globe visible behind -->
+  <section class="sc-section sc-hero">
+    <div class="sc-hero-inner">
+      <img src="logo.png" alt="Nortel Network Group" class="sc-logo">
+      <div class="sc-company">Nortel Network Group, LLC</div>
+      <div class="sc-tagline">Intelligence. Engineered for Growth.</div>
+      <div class="sc-divider"></div>
+      <a href="tel:+12137554907" class="sc-cta">📞 Call NOVA</a>
+      <p class="sc-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
+    </div>
+  </section>
+
+  <!-- §2 OUR MISSION -->
+  <section class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Our Mission</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">We were founded on the belief that Black-owned businesses deserve to compete at industry standard — and we lead with that commitment. We bring that same dedication to underserved businesses and companies of all sizes who are ready to grow. Our mission is to elevate every business we serve until they can compete, scale, and win.</p>
+    </div>
+  </section>
+
+  <!-- §3 FULLY AUTONOMOUS -->
+  <section class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Fully Autonomous. Always Running.</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">Our AI never sleeps. While you focus on your vision, our systems handle operations around the clock — for Nortel and for every business we partner with. No slowdowns. No gaps. Just consistent, intelligent execution driving growth 24/7.</p>
+    </div>
+  </section>
+
+  <!-- §4 WHAT WE DO -->
+  <section class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">What We Do</h2>
+      <div class="sc-divider"></div>
+      <ul class="sc-list">
+        <li>Autonomous marketing — campaigns, copy, and creative</li>
+        <li>Website design, building, and rebuilding</li>
+        <li>Social media management and growth</li>
+        <li>TikTok Shop setup and fulfillment</li>
+        <li>Mobile and web app development</li>
+        <li>Full e-commerce build-out and management</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- §5 BUILT TO HANDLE VOLUME -->
+  <section class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Built to Handle Volume</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">We don't just help businesses get started — we bring them up to industry standard so they can absorb real demand. Every system we build is designed to scale. When your business grows, our infrastructure grows with it.</p>
+    </div>
+  </section>
+
+  <!-- §6 LONG-TERM PARTNERSHIP -->
+  <section class="sc-section">
+    <div class="sc-card">
+      <h2 class="sc-heading">Long-Term Partnership</h2>
+      <div class="sc-divider"></div>
+      <p class="sc-body">We don't do one-off projects. We build lasting relationships with the businesses we serve — staying invested in their growth, refining what we build, and showing up for the long haul. When you work with Nortel, we're in it with you.</p>
+    </div>
+  </section>
+
+  <!-- §7 FINAL CTA -->
+  <section class="sc-section">
+    <div class="sc-final-inner">
+      <p class="sc-final-label">Ready to grow?</p>
+      <a href="tel:+12137554907" class="sc-cta">📞 Call NOVA</a>
+      <p class="sc-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
+    </div>
+  </section>
+
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+/* ── Shared constants ─────────────────────────────────────── */
+const isMobile    = window.innerWidth < 768;
+const enterScreen = document.getElementById('enter-screen');
+const shieldWrap  = document.getElementById('shield-wrap');
+const shieldImg   = document.getElementById('shield-img');
+const flash       = document.getElementById('flash');
+const meltCanvas    = document.getElementById('melt-canvas');
+const threeCanvas   = document.getElementById('three-canvas');
+const scrollContent = document.getElementById('scroll-content');
+
+/* ══════════════════════════════════════════════════════════
+   INTRO SEQUENCE
+══════════════════════════════════════════════════════════ */
+
+/* ── Web Audio: chimes + whoosh + thud ───────────────────── */
+function makeAudioCtx() {
+  try { return new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
+}
+
+function playIntroSound(ctx) {
+  if (!ctx) return;
+  const now = ctx.currentTime;
+
+  [293.66, 369.99, 440.00, 587.33, 739.99].forEach((freq, i) => {
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, now + i * 0.07);
+    gain.gain.linearRampToValueAtTime(0.18, now + i * 0.07 + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.07 + 1.4);
+    osc.start(now + i * 0.07);
+    osc.stop(now  + i * 0.07 + 1.5);
+  });
+
+  const bufLen = ctx.sampleRate * 3.5;
+  const buf    = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+  const data   = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource();
+  src.buffer  = buf;
+  const bpf   = ctx.createBiquadFilter();
+  bpf.type    = 'bandpass';
+  bpf.frequency.setValueAtTime(200, now + 0.3);
+  bpf.frequency.exponentialRampToValueAtTime(3200, now + 2.8);
+  bpf.Q.value = 1.5;
+  const gW = ctx.createGain();
+  gW.gain.setValueAtTime(0, now + 0.3);
+  gW.gain.linearRampToValueAtTime(0.22, now + 0.7);
+  gW.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
+  src.connect(bpf); bpf.connect(gW); gW.connect(ctx.destination);
+  src.start(now + 0.3);
+
+  const tBuf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+  const td   = tBuf.getChannelData(0);
+  for (let i = 0; i < tBuf.length; i++) td[i] = (Math.random()*2-1) * Math.exp(-i/(ctx.sampleRate*0.07));
+  const tSrc = ctx.createBufferSource(); tSrc.buffer = tBuf;
+  const lpf  = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 140;
+  const gT   = ctx.createGain();
+  gT.gain.setValueAtTime(0.9, now + 2.88);
+  gT.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
+  tSrc.connect(lpf); lpf.connect(gT); gT.connect(ctx.destination);
+  tSrc.start(now + 2.88);
+}
+
+/* ── Reveal: fade in globe canvas + scroll content ───────── */
+function revealGlobe() {
+  threeCanvas.classList.add('reveal');
+  scrollContent.classList.add('reveal');
+}
+
+/* ── Melt dissolve — columns drip down, globe shows through ─ */
+function runMeltDissolve() {
+  const mc  = meltCanvas;
+  const ctx = mc.getContext('2d');
+  mc.width  = window.innerWidth;
+  mc.height = window.innerHeight;
+
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, mc.width, mc.height);
+  mc.classList.add('visible');
+
+  revealGlobe(); // globe fades in concurrently as drips fall
+
+  const COLS   = isMobile ? 80 : 160;
+  const colW   = Math.ceil(mc.width / COLS);
+  const drops  = Array.from({length: COLS}, () => 0);
+  const speeds = Array.from({length: COLS}, () => mc.height * (0.014 + Math.random() * 0.026));
+  const done   = new Uint8Array(COLS);
+  let finished = 0;
+
+  function step() {
+    for (let c = 0; c < COLS; c++) {
+      if (done[c]) continue;
+      drops[c] += speeds[c];
+      ctx.clearRect(c * colW, 0, colW, drops[c]);
+      if (drops[c] >= mc.height) { done[c] = 1; finished++; }
+    }
+    if (finished < COLS) requestAnimationFrame(step);
+    else mc.classList.remove('visible');
+  }
+  requestAnimationFrame(step);
+}
+
+/* ── Shield fly-in — JS rAF for visible spin at all scales ── */
+function runShieldIntro(audioCtx) {
+  playIntroSound(audioCtx);
+  enterScreen.classList.add('hidden');
+  shieldWrap.classList.add('active');
+
+  const DURATION  = 3000;
+  const startTime = performance.now();
+
+  function animFrame(now) {
+    const t = Math.min((now - startTime) / DURATION, 1);
+
+    // Cubic ease-in scale: tiny dot → medium centered size (~40-50% screen height)
+    const scale = 0.02 + Math.pow(t, 3) * 2.98;
+
+    // Smooth-step rotation: 6 full spins concentrated when logo is visible
+    const rotEased = t * t * (3 - 2 * t);
+    const rotDeg   = rotEased * 2160;
+
+    const glowR = (8  + t * 32).toFixed(1);
+    const glowA = (0.3 + t * 0.7).toFixed(2);
+
+    shieldImg.style.transform = `scale(${scale.toFixed(4)}) rotateY(${rotDeg.toFixed(1)}deg)`;
+    shieldImg.style.filter    = `drop-shadow(0 0 ${glowR}px rgba(212,175,55,${glowA}))`;
+
+    if (t < 1) requestAnimationFrame(animFrame);
+    else        onImpact();
+  }
+  requestAnimationFrame(animFrame);
+}
+
+/* ── Impact: flash + shake + 0.8s hold + melt ───────────── */
+function onImpact() {
+  document.body.classList.add('shake');
+  setTimeout(() => document.body.classList.remove('shake'), 420);
+
+  flash.classList.add('pop');
+  setTimeout(() => { flash.classList.add('fade'); flash.classList.remove('pop'); }, 130);
+
+  setTimeout(() => {
+    shieldWrap.style.transition = 'opacity 0.25s';
+    shieldWrap.style.opacity    = '0';
+    runMeltDissolve();
+  }, 800);
+}
+
+/* ── Entry point ─────────────────────────────────────────── */
+enterScreen.addEventListener('click', () => {
+  const actx = makeAudioCtx();
+  const go   = () => runShieldIntro(actx);
+  if (actx && actx.state === 'suspended') actx.resume().then(go); else go();
+});
+
+/* ══════════════════════════════════════════════════════════
+   GLOBE — Three.js (uses #three-canvas from outer scope)
+══════════════════════════════════════════════════════════ */
 (function(){
 'use strict';
 
-const isMobile = innerWidth < 768;
-
-// ── RENDERER ──────────────────────────────────────────────────
-const renderer = new THREE.WebGLRenderer({antialias:!isMobile});
+// threeCanvas and isMobile are in outer scope
+const renderer = new THREE.WebGLRenderer({canvas: threeCanvas, antialias: !isMobile});
 renderer.setPixelRatio(isMobile ? 1 : Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0x0a0a0a, 1);
-document.body.appendChild(renderer.domElement);
 
 const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(48, innerWidth/innerHeight, 0.1, 100);
@@ -32,12 +456,12 @@ camera.position.z = 3.2;
 const globe = new THREE.Group();
 scene.add(globe);
 
-// ── GLOBE PARTICLES (Fibonacci sphere) ───────────────────────
+// ── GLOBE PARTICLES (Fibonacci sphere) ──────────────────
 const N   = isMobile ? 2400 : 5800;
 const pos = new Float32Array(N * 3);
 const col = new Float32Array(N * 3);
 const R   = 1.0;
-const PHI = (1 + Math.sqrt(5)) / 2;   // golden ratio
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 for (let i = 0; i < N; i++) {
   const theta = Math.acos(1 - 2 * (i + .5) / N);
@@ -46,34 +470,27 @@ for (let i = 0; i < N; i++) {
   pos[i*3+1] = R * Math.cos(theta);
   pos[i*3+2] = R * Math.sin(theta) * Math.sin(phi);
 
-  // Three-tier gold palette with random selection
   const r = Math.random();
   if (r > .87) {
-    col[i*3]=.961; col[i*3+1]=.906; col[i*3+2]=.627;  // #F5E7A0 bright highlight
+    col[i*3]=.961; col[i*3+1]=.906; col[i*3+2]=.627;  // #F5E7A0 bright
   } else if (r > .50) {
-    col[i*3]=.831; col[i*3+1]=.686; col[i*3+2]=.216;  // #D4AF37 mid gold
+    col[i*3]=.831; col[i*3+1]=.686; col[i*3+2]=.216;  // #D4AF37 mid
   } else {
-    col[i*3]=.722; col[i*3+1]=.525; col[i*3+2]=.043;  // #B8860B deep gold
+    col[i*3]=.722; col[i*3+1]=.525; col[i*3+2]=.043;  // #B8860B deep
   }
 }
 
 const ptGeo = new THREE.BufferGeometry();
 ptGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 ptGeo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
-
 const ptMat = new THREE.PointsMaterial({
   size: isMobile ? .022 : .014,
-  vertexColors: true,
-  transparent: true,
-  opacity: .88,
-  sizeAttenuation: true,
-  depthWrite: false,
-  blending: THREE.AdditiveBlending
+  vertexColors: true, transparent: true, opacity: .88,
+  sizeAttenuation: true, depthWrite: false, blending: THREE.AdditiveBlending
 });
-
 globe.add(new THREE.Points(ptGeo, ptMat));
 
-// ── ATMOSPHERE — Fresnel rim glow (BackSide sphere) ──────────
+// ── ATMOSPHERE — Fresnel rim glow ───────────────────────
 const atmosMat = new THREE.ShaderMaterial({
   uniforms: { uC: { value: new THREE.Color(0xD4AF37) } },
   vertexShader: `
@@ -92,14 +509,12 @@ const atmosMat = new THREE.ShaderMaterial({
       gl_FragColor = vec4(uC, rim * 0.55);
     }
   `,
-  transparent: true,
-  depthWrite: false,
-  side: THREE.BackSide,
-  blending: THREE.AdditiveBlending
+  transparent: true, depthWrite: false,
+  side: THREE.BackSide, blending: THREE.AdditiveBlending
 });
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.18, 40, 40), atmosMat));
 
-// ── OUTER HALO — radial canvas gradient Sprite ───────────────
+// ── OUTER HALO — canvas gradient Sprite ─────────────────
 const haloCanvas = document.createElement('canvas');
 haloCanvas.width = haloCanvas.height = 256;
 const hCtx = haloCanvas.getContext('2d');
@@ -110,18 +525,15 @@ hGrad.addColorStop(0.75, 'rgba(184,134,11,0.04)');
 hGrad.addColorStop(1,    'rgba(0,0,0,0)');
 hCtx.fillStyle = hGrad;
 hCtx.fillRect(0, 0, 256, 256);
-
 const halo = new THREE.Sprite(new THREE.SpriteMaterial({
   map: new THREE.CanvasTexture(haloCanvas),
-  transparent: true,
-  opacity: 1,
-  depthWrite: false,
-  blending: THREE.AdditiveBlending
+  transparent: true, opacity: 1,
+  depthWrite: false, blending: THREE.AdditiveBlending
 }));
 halo.scale.set(3.4, 3.4, 1);
 scene.add(halo);
 
-// ── ARCS — curved light connections ──────────────────────────
+// ── ARCS — curved light connections ─────────────────────
 const MAX_ARCS = isMobile ? 3 : 7;
 const arcs = [];
 
@@ -135,55 +547,38 @@ function randSphPt() {
   );
 }
 
-// Shared geometry for endpoint dots (shared, never disposed)
 const dotGeo = new THREE.SphereGeometry(.032, 6, 6);
 
 function spawnArc() {
   if (arcs.length >= MAX_ARCS) return;
+  const a = randSphPt(), b = randSphPt();
+  if (a.distanceTo(b) < 1.1) return;
 
-  const a = randSphPt();
-  const b = randSphPt();
-  if (a.distanceTo(b) < 1.1) return;   // skip if endpoints too close
-
-  // Control point: midpoint pushed outward to create the arc bow
   const mid  = a.clone().add(b).multiplyScalar(.5);
   const ctrl = mid.clone().normalize().multiplyScalar(R + a.distanceTo(b) * .52);
-
   const curve   = new THREE.QuadraticBezierCurve3(a, ctrl, b);
   const lineGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(72));
   const lineMat = new THREE.LineBasicMaterial({
     color: 0xF5E7A0, transparent: true, opacity: 0,
     depthWrite: false, blending: THREE.AdditiveBlending
   });
-
   const mA = new THREE.MeshBasicMaterial({
     color: 0xFFEE88, transparent: true, opacity: 0,
     depthWrite: false, blending: THREE.AdditiveBlending
   });
-  const mB = mA.clone();
-  const dA = new THREE.Mesh(dotGeo, mA);
-  const dB = new THREE.Mesh(dotGeo, mB);
-  dA.position.copy(a);
-  dB.position.copy(b);
-
+  const mB  = mA.clone();
+  const dA  = new THREE.Mesh(dotGeo, mA);
+  const dB  = new THREE.Mesh(dotGeo, mB);
+  dA.position.copy(a); dB.position.copy(b);
   const line = new THREE.Line(lineGeo, lineMat);
   globe.add(line, dA, dB);
-
-  arcs.push({
-    line, dA, dB, mA, mB,
-    age: 0,
-    life: 2.8 + Math.random() * 2.0,
-    fi: .55,   // fade-in duration
-    fo: .85    // fade-out duration
-  });
+  arcs.push({ line, dA, dB, mA, mB, age: 0, life: 2.8 + Math.random() * 2.0, fi: .55, fo: .85 });
 }
 
-// Stagger initial arcs
 for (let i = 0; i < Math.min(3, MAX_ARCS); i++) setTimeout(spawnArc, i * 800);
 
-// ── MOUSE / TOUCH INPUT ───────────────────────────────────────
+// ── INPUT ────────────────────────────────────────────────
 let mx = 0, my = 0, tx = 0, ty = 0;
-
 window.addEventListener('mousemove', e => {
   tx = (e.clientX / innerWidth  - .5) * 2;
   ty = (e.clientY / innerHeight - .5) * 2;
@@ -192,14 +587,13 @@ window.addEventListener('touchmove', e => {
   tx = (e.touches[0].clientX / innerWidth  - .5) * 2;
   ty = (e.touches[0].clientY / innerHeight - .5) * 2;
 }, { passive: true });
-
 window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
 
-// ── ANIMATION LOOP ────────────────────────────────────────────
+// ── ANIMATE ──────────────────────────────────────────────
 let lt = 0, rotY = 0, tiltX = 0, arcT = 0;
 
 function animate(now) {
@@ -207,43 +601,34 @@ function animate(now) {
   const dt = Math.min((now - lt) / 1000, .05);
   lt = now;
 
-  // Smooth mouse tracking
   mx += (tx - mx) * .05;
   my += (ty - my) * .05;
 
-  // Globe: auto-spin Y + mouse tilt X
   rotY  += dt * .25;
   tiltX += (my * .32 - tiltX) * .06;
   globe.rotation.set(tiltX, rotY, 0);
 
-  // Arcs: spawn & lifecycle
   arcT += dt;
   if (arcT > 1.4) { arcT = 0; spawnArc(); }
 
   for (let i = arcs.length - 1; i >= 0; i--) {
     const arc = arcs[i];
     arc.age += dt;
-
     let op;
-    if (arc.age < arc.fi)               op = arc.age / arc.fi;
+    if (arc.age < arc.fi)                op = arc.age / arc.fi;
     else if (arc.age > arc.life - arc.fo) op = (arc.life - arc.age) / arc.fo;
     else                                  op = 1;
     op = Math.max(0, op);
-
     arc.line.material.opacity = op * .80;
     arc.mA.opacity = arc.mB.opacity = op;
-
     if (arc.age >= arc.life) {
       globe.remove(arc.line, arc.dA, arc.dB);
-      arc.line.geometry.dispose();
-      arc.line.material.dispose();
-      arc.mA.dispose();
-      arc.mB.dispose();
+      arc.line.geometry.dispose(); arc.line.material.dispose();
+      arc.mA.dispose(); arc.mB.dispose();
       arcs.splice(i, 1);
     }
   }
 
-  // Subtle camera parallax (cursor pulls camera, not globe)
   camera.position.x =  mx * .12;
   camera.position.y = -my * .12;
   camera.lookAt(0, 0, 0);
