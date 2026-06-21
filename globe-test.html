@@ -104,7 +104,7 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
 @media(max-width:680px){.sc-section{padding:80px 20px}}
 
 /* ── Hero ─────────────────────────────────────────────────── */
-.sc-hero{background:transparent}
+.sc-hero{background:transparent;position:relative}
 .sc-hero-inner{
   display:flex;flex-direction:column;
   align-items:center;text-align:center;
@@ -194,6 +194,102 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
+
+/* ── Fixed nav bar ────────────────────────────────────────── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;
+  background:rgba(6,4,1,0.76);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(212,175,55,.07);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.7s ease-out 0.6s;
+}
+#nav.reveal{opacity:1;pointer-events:auto}
+@media(max-width:680px){#nav{padding:0 20px}}
+
+.nav-brand{display:flex;align-items:center;gap:11px;text-decoration:none}
+.nav-logo{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(212,175,55,.35))}
+.nav-name{
+  font-size:13px;font-weight:600;letter-spacing:.05em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.nav-links{display:flex;align-items:center;gap:36px}
+.nav-link{
+  font-size:13px;font-weight:500;letter-spacing:.05em;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  opacity:.7;transition:opacity .2s;cursor:pointer;text-decoration:none;
+}
+.nav-link:hover{opacity:1}
+.nav-cta-btn{
+  display:inline-flex;align-items:center;
+  padding:8px 24px;border-radius:3px;text-decoration:none;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  font-size:12px;font-weight:700;letter-spacing:.07em;color:#1a0e00;
+  box-shadow:0 2px 10px rgba(212,175,55,.22);
+  transition:transform .18s,box-shadow .18s;
+}
+.nav-cta-btn:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(212,175,55,.4)}
+@media(max-width:680px){.nav-link{display:none}}
+
+/* ── Mouse scroll cue — bottom of hero ───────────────────── */
+.sc-mouse-cue{
+  position:absolute;bottom:48px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  pointer-events:none;z-index:25;
+  opacity:1;transition:opacity 0.7s ease-out;
+}
+/* Dark radial halo so cue reads against any globe colour */
+.sc-mouse-cue::before{
+  content:'';
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:110px;height:90px;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,0.55) 0%,transparent 72%);
+  pointer-events:none;z-index:-1;
+}
+.sc-mouse-cue.hidden{opacity:0}
+.sc-mouse-icon{
+  width:26px;height:42px;
+  border:2px solid rgba(212,175,55,0.95);
+  border-radius:13px;
+  display:flex;justify-content:center;
+  padding-top:7px;
+  box-shadow:0 0 10px rgba(212,175,55,0.25), inset 0 0 6px rgba(212,175,55,0.06);
+}
+.sc-mouse-wheel{
+  width:4px;height:8px;
+  background:#D4AF37;
+  border-radius:2px;
+  animation:wheelScroll 1.9s ease-in-out infinite;
+}
+@keyframes wheelScroll{
+  0%,100%{transform:translateY(0);opacity:1}
+  55%    {transform:translateY(8px);opacity:.2}
+}
+.sc-mouse-label{
+  font-size:10px;letter-spacing:.34em;text-transform:uppercase;
+  background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+/* ── Vertical scroll progress bar — right edge ───────────── */
+#scroll-progress{
+  position:fixed;right:0;top:0;z-index:48;
+  width:3px;height:100vh;
+  background:rgba(212,175,55,.07);
+  opacity:0;transition:opacity 0.5s ease-out;
+}
+#scroll-progress.reveal{opacity:1}
+#scroll-fill{
+  width:100%;height:0%;
+  background:linear-gradient(to bottom,#9A7008,#D4AF37,#F5E7A0,#D4AF37,#9A7008);
+}
+@media(max-width:680px){#scroll-progress{display:none}}
 </style>
 </head>
 <body>
@@ -218,6 +314,20 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
 <!-- ══ GLOBE CANVAS ═══════════════════════════════════════ -->
 <canvas id="three-canvas"></canvas>
 
+<!-- ══ NAV BAR ══════════════════════════════════════════════ -->
+<nav id="nav" role="navigation" aria-label="Main navigation">
+  <a href="#" class="nav-brand">
+    <img src="logo.png" alt="Nortel" class="nav-logo">
+    <span class="nav-name">Nortel Network Group</span>
+  </a>
+  <div class="nav-links">
+    <a href="#mission"     class="nav-link">Mission</a>
+    <a href="#services"    class="nav-link">What We Do</a>
+    <a href="#partnership" class="nav-link">Partnership</a>
+    <a href="tel:+12137554907" class="nav-cta-btn">Call NOVA</a>
+  </div>
+</nav>
+
 <!-- ══ SCROLL CONTENT ══════════════════════════════════════ -->
 <div id="scroll-content">
 
@@ -231,10 +341,16 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
       <a href="tel:+12137554907" class="sc-cta">📞 Call NOVA</a>
       <p class="sc-sub">+1 (213) 755-4907 &nbsp;·&nbsp; christopher@nortelnetworkgroup.com</p>
     </div>
+    <div class="sc-mouse-cue" id="mouse-cue">
+      <div class="sc-mouse-icon">
+        <div class="sc-mouse-wheel"></div>
+      </div>
+      <span class="sc-mouse-label">Scroll</span>
+    </div>
   </section>
 
   <!-- §2 OUR MISSION -->
-  <section class="sc-section">
+  <section id="mission" class="sc-section">
     <div class="sc-card">
       <h2 class="sc-heading">Our Mission</h2>
       <div class="sc-divider"></div>
@@ -252,7 +368,7 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   </section>
 
   <!-- §4 WHAT WE DO -->
-  <section class="sc-section">
+  <section id="services" class="sc-section">
     <div class="sc-card">
       <h2 class="sc-heading">What We Do</h2>
       <div class="sc-divider"></div>
@@ -277,7 +393,7 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   </section>
 
   <!-- §6 LONG-TERM PARTNERSHIP -->
-  <section class="sc-section">
+  <section id="partnership" class="sc-section">
     <div class="sc-card">
       <h2 class="sc-heading">Long-Term Partnership</h2>
       <div class="sc-divider"></div>
@@ -296,6 +412,9 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
 
 </div>
 
+<!-- ══ SCROLL PROGRESS ═════════════════════════════════════ -->
+<div id="scroll-progress"><div id="scroll-fill"></div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ── Shared constants ─────────────────────────────────────── */
@@ -307,6 +426,7 @@ const flash       = document.getElementById('flash');
 const meltCanvas    = document.getElementById('melt-canvas');
 const threeCanvas   = document.getElementById('three-canvas');
 const scrollContent = document.getElementById('scroll-content');
+const nav           = document.getElementById('nav');
 
 /* ══════════════════════════════════════════════════════════
    INTRO SEQUENCE
@@ -363,11 +483,42 @@ function playIntroSound(ctx) {
   tSrc.start(now + 2.88);
 }
 
-/* ── Reveal: fade in globe canvas + scroll content ───────── */
+/* ── Reveal: globe canvas + scroll content + nav + progress ─ */
 function revealGlobe() {
   threeCanvas.classList.add('reveal');
   scrollContent.classList.add('reveal');
+  nav.classList.add('reveal');
+  document.getElementById('scroll-progress').classList.add('reveal');
 }
+
+/* ── Scroll progress bar + mouse-cue fade-out ────────────── */
+(function(){
+  const fill    = document.getElementById('scroll-fill');
+  const mouseCue = document.getElementById('mouse-cue');
+  let cueGone = false;
+
+  scrollContent.addEventListener('scroll', () => {
+    const max = scrollContent.scrollHeight - scrollContent.clientHeight;
+    if (max > 0) fill.style.height = (scrollContent.scrollTop / max * 100) + '%';
+
+    if (!cueGone && scrollContent.scrollTop > 30) {
+      cueGone = true;
+      mouseCue.classList.add('hidden');
+    }
+  });
+})();
+
+/* ── Nav smooth-scroll (offset 64px for fixed nav height) ── */
+document.querySelectorAll('.nav-link[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const id = link.getAttribute('href').slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    const top = target.getBoundingClientRect().top + scrollContent.scrollTop - 64;
+    scrollContent.scrollTo({ top, behavior: 'smooth' });
+  });
+});
 
 /* ── Melt dissolve — columns drip down, globe shows through ─ */
 function runMeltDissolve() {
