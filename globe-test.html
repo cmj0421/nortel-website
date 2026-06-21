@@ -194,6 +194,18 @@ body.shake{animation:screenShake .38s cubic-bezier(.36,.07,.19,.97) both}
   background:linear-gradient(135deg,#B8860B 0%,#D4AF37 38%,#F5E7A0 62%,#D4AF37 82%,#9A7008 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
+
+/* ── Scroll-reveal: initial hidden state ─────────────────── */
+.sc-reveal{
+  opacity:0;
+  transform:translateY(32px);
+  transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1),
+             transform 0.8s cubic-bezier(0.22,1,0.36,1);
+}
+.sc-reveal.in-view{
+  opacity:1;
+  transform:translateY(0);
+}
 </style>
 </head>
 <body>
@@ -454,6 +466,23 @@ enterScreen.addEventListener('click', () => {
   const go   = () => runShieldIntro(actx);
   if (actx && actx.state === 'suspended') actx.resume().then(go); else go();
 });
+
+/* ── Scroll-reveal observer ──────────────────────────────── */
+(function(){
+  const els = document.querySelectorAll('.sc-card, .sc-final-inner');
+  els.forEach(el => el.classList.add('sc-reveal'));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  els.forEach(el => observer.observe(el));
+})();
 
 /* ══════════════════════════════════════════════════════════
    GLOBE — Three.js (uses #three-canvas from outer scope)
